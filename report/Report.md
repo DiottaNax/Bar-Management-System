@@ -2,6 +2,14 @@
 title: "Report Database"
 author: "Federico Diotallevi"
 date: "2023/2024"
+geometry: margin=2cm
+classoption: table
+documentclass: extarticle
+urlcolor: blue
+fontsize: 12pt
+header-includes: |
+    \rowcolors{2}{gray!20}{white!}
+output: pdf_document
 ---
 
 \newpage
@@ -42,3 +50,14 @@ Il sistema supporta anche la gestione delle promozioni sui prodotti, consentendo
 
 In sintesi, il compito dello staff del bar/ristorante è assicurarsi che le comande vengano redatte e gestite correttamente, che i prodotti siano sempre disponibili in magazzino, e che le vendite e il fatturato vengano monitorati e analizzati per migliorare la gestione complessiva del locale.
 
+## Estrazione dei concetti principali
+
+| **Termine**  | **Breve descrizione** | **Eventuali Sinonimi** |
+|:-------------|:---------------------:|
+| Prodotto     | Sono gli articoli venduti dall'esercizio, ognuno con un proprio costo |
+| Tavolo       | Oggetto a cui è possibile attribuire un nome e una data, rappresenta il gruppo dei clienti a cui si riferiscono comande e scontrini |
+| Comanda      | Una comanda è un ordine effettuato in un qualsiasi momento dai clienti di un tavolo, contenente uno o più prodotti | Ordine |
+| Scontrino    | Oggetto in cui viene riportata una spesa effettuata da un tavolo, possono esserci uno o più scontrini associati ad un tavolo | Spesa |
+| Cameriere    | Colui che compila comande e scontrini |
+| Bartender    | Colui che segna le comande come completate | Cuoco |
+| Magazziniere | Colui che segna la disponibilità dei prodotti nel magazzino |
