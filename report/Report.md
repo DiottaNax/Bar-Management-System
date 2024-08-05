@@ -129,7 +129,7 @@ Di ogni dipendente si vuole mantenere nel databse il ruolo all'interno del local
 \newpage
 Uno stesso ***prodotto*** può presentarsi in uno stesso ***ordine*** al più una volta, perciò la relazione di _ordinazione_ possiede l'attributo _quantità_ esprimendo il vincolo per il quale le stesse istanze di ordine e prodotto non possono presentarsi con molteplici quantità, creando confusione nell'ordine. Per la _disponibilità_ in magazzino del prodotto si è aggiunto un semplice attributo alla specializzazione ***prodotto in magazzino***.
 
-![Schema parziale sugli ordini dei prodotti](./img/Schema_prodotto-ordine.png){width=700}
+![Schema parziale sugli ordini dei prodotti](./img/Schema_prodotto-ordine.png){width=660}
 
 \newpage
 Di seguito si allega lo schema ER nel suo complesso, importato su [DB-Main](www.db-main.eu).
