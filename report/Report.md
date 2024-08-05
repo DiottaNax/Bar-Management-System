@@ -77,6 +77,11 @@ A seguito della lettura e comprensione dei requisiti si redige un testo che ne r
 >    - ***magazzinieri***: ordinano prodotti del magazzino e ne segnano la disponibilità.
 >    - ***camerieri***: aggiungono tavoli e compilano comande e scontrini.
 
+[//]: #Footnotes
+
+[^1]: Un prodotto può essenzialmente essere un prodotto preparato (es: un drink), un prodotto da magazzino (es: farina) oppure entrambi (es: bottiglia di vino).
+[^2]: i.e. contante, bancomat...
+
 Segue un elenco delle principali azioni richieste:
 
 1. Aggiungere prodotti
@@ -92,11 +97,40 @@ Segue un elenco delle principali azioni richieste:
 11. Visualizzare i costi dei rifornimenti in un dato periodo
 12. Registrare staff del locale
 
+\newpage
+# Progettazione concettuale
 
+## Schema Scheletro
 
-[//]: #Footnotes
+L'entità ***prodotto*** viene identificata tramite un codice univoco, dall'analisi si evince che ne esistono due tipologie:
 
-[^1]: Un prodotto può essenzialmente essere un prodotto preparato (es: un drink), un prodotto da magazzino (es: farina) oppure entrambi (es: bottiglia di vino).
-[^2]: i.e. contante, bancomat...
+- prodotti da magazzino 
+- prodotti in menu
 
+ queste tipologie sono specializzazioni _sovrapponibili_ dell'entità prodotto. 
+
+![Schema parziale sulle specializzazioni di prodotto](./img/Schema_Prodotto.png){width=600px}
+
+\newpage
+Uno stesso ***prodotto*** può presentarsi nella stessa ***comanda*** con richieste  e quantità differenti (si pensi ad esempio ad una stessa bevanda, nello stesso tavolo, ordinata allo stesso momento, una con ghiaccio, una senza).
+E' quindi necessario reificare l'entità _prodotto in comanda_, identificata tramite un ordine nella comanda e il codice della comanda.
+
+Ad ogni comanda corrisponde un ***tavolo***, identificato anch'esso tramite un _codice univoco_. Ad ogni tavolo è possibile assegnare un _nome_ e un _numero di clienti_ seduti.
+
+![Schema parziale sulle relazioni tra tavoli, comande e prodotti](./img/Schema_prodotti-comande-tavoli.png){width=700px}
+
+\newpage
+
+Le entità ***cameriere, preparatore, amministratore*** e ***magazziniere*** non sono altro che specializzazioni dell'entità ***persona*** (o dipendente), ognuna identificata tramite _codice fiscale_. 
+Di ogni dipendente si vuole mantenere nel databse il ruolo all'interno del locale per conoscere le operazioni che possono effettuare (ad esempio la visualizzazione dei dati sul fatturato è un'operazione che spetta esclusivamente ad un amministratore). In particolare per ogni comanda si vuole tenere nel database il cameriere che l'ha compilata.
+
+![Schema parziale sulle specializzazioni dei dipendenti](./img/Schema_dipendenti.png){width=700}
+
+\newpage
+Uno stesso ***prodotto*** può presentarsi in uno stesso ***ordine*** al più una volta, perciò la relazione di _ordinazione_ possiede l'attributo _quantità_ esprimendo il vincolo per il quale le stesse istanze di ordine e prodotto non possono presentarsi con molteplici quantità, creando confusione nell'ordine. Per la _disponibilità_ in magazzino del prodotto si è aggiunto un semplice attributo alla specializzazione ***prodotto in magazzino***.
+
+![Schema parziale sugli ordini dei prodotti](./img/Schema_prodotto-ordine.png){width=700}
+
+\newpage
+Di seguito si allega lo schema ER nel suo complesso, importato su [DB-Main](www.db-main.eu).
 
