@@ -15,6 +15,9 @@ output: pdf_document
 \newcommand{\bluerow}{\rowcolor{RoyalBlue!60}}
 \newcommand{\lbluerow}{\rowcolor{RoyalBlue!40}}
 \newcommand{\whiterow}{\rowcolor{white}}
+\newcommand{\redrow}{\rowcolor{BrickRed!60}}
+\newcommand{\lredrow}{\rowcolor{BrickRed!40}}
+\newcommand{\llredrow}{\rowcolor{BrickRed!15}}
 \newpage
 \tableofcontents
 \newpage
@@ -55,10 +58,10 @@ In sintesi, il compito dello staff del bar/ristorante è assicurarsi che le coma
 
 ## Estrazione dei concetti principali
 
-| **Termine**  | **Breve descrizione** | **Eventuali Sinonimi** |
-|:-------------|:---------------------:|-----------------------:|
+| \bluerow\ **Termine**  | **Breve descrizione**       | **Eventuali Sinonimi** |
+|:-------------|:-----------------------------------------:|-------------------:|
 | Prodotto     | Sono gli articoli venduti dall'esercizio, ognuno con un proprio costo |
-| Tavolo       | Oggetto a cui è possibile attribuire un nome e una data, rappresenta il gruppo dei clienti a cui si riferiscono comande e scontrini | Clienti |
+| Tavolo       | Oggetto a cui è possibile attribuire un nome e una data, rappresenta il gruppo dei clienti a cui si riferiscono comande e scontrini       | Clienti |
 | Comanda      | Una comanda è un ordine effettuato in un qualsiasi momento dai clienti di un tavolo, contenente uno o più prodotti |
 | Scontrino    | Oggetto in cui viene riportata una spesa effettuata da un tavolo, possono esserci uno o più scontrini associati ad un tavolo | Spesa |
 | Cameriere    | Colui che compila comande e scontrini | Cassiere |
@@ -152,25 +155,38 @@ Di seguito la stima dei volumi richiesti per entità e relazioni:
 |:----------------------------|:-------------:|-----------:|
 | Menu Product                | E             | 80         |
 | Stocked Up Product          | E             | 250        |
-| Ingredient                  | R             | 400        |
+| Ingredient                  | R             | 320[^3]    |
+| Variation                   | E             | 480[^4]    |
+| customer choice             | R             | 480        |
+
+[^3]: Considerando una media di 4 ingredienti per prodotto in menu 
+[^4]: Considerando 6 variazioni per ogni prodotto in menu
 
 [Tabella ordini]: #Tabella ordini, tavoli, scontrini e prenotazioni
 
-|\bluerow\ **Concetto** | **Costrutto** |  **Volume**|
+|\bluerow\ **Concetto** | **Costrutto** | **Volume** |
 |:----------------------|:-------------:|-----------:|
-| based on              | R             | 400.000    |
-| Ordered Product       | E             | 400.000    |
-| Paid Product          | E             | 1.000.000  |
-| is                    | R             | 1.000.000  |
-| has                   | R             | 1.000.000  |
-| Receipt               | E             | 640.000    |
-| Customer Order        | E             | 100.000    |
-| assignment            | R             | 100.000    |
-| order composition     | R             | 400.000    |
-| Table                 | E             | 30.000     |
-| payment               | R             | 600.000    |
+| Table                 | E             | 150.000    |
+| Product In Table      | E             | 750.000[^5]|
+| Customer Order        | E             | 300.000[^6]|
+| based on              | R             | 750.000    |
+| additional request    | R             | 750.000[^7]|
+| Receipt               | E             | 300.000[^8]|
+| Paid Product          | E             | 1.000.000[^9]|
+| product payment       | R             | 1.000.000  |
+| receipt composition   | R             | 1.000.000  |
+| table payment         | R             | 300.000    |
+| order composition     | R             | 750.000    | 
+| assignment            | R             | 300.000    |
+| order compilation     | R             | 300.000    |
 | Reservation           | E             | 5.000      |
 | request               | R             | 5.000      |
+
+[^5]: Considerando circa 5 diversi prodotti ordinati in un tavolo
+[^6]: Considerando circa 2 comande per tavolo
+[^7]: Considerando che ogni prodotto ordinato presenta una variazione
+[^8]: Considerando circa 2 scontrini per tavolo
+[^9]: Considerando che per ogni prodotto al tavolo deve esistere almeno un corrispondente prodotto pagato e che alcuni potrebbero essere pagati in scontrini diversi
 
 [Tabella magazzino]: #Tabella ordini di magazzino
 
@@ -239,24 +255,32 @@ L'aggiornamento di un _prodotto_ comporta anche l'aggiornamento della ricetta, p
 | \bluerow\ **Concetto** | **Costrutto** | **Accessi** | **Tipo** |
 |:----------------------:|:-------------:|:-----------:|---------:|
 | Table                  | E             | 1           | S        |
-| \lbluerow              | **Totale:**   | 1S → 600 a settimana   |
+| \lbluerow              | **Totale:**   | 1S → 400 a settimana   |
 
 ### Operazione 3 - Compilare Comande
 
-La compilazione delle _comande_ richiede delle ricerche di _prodotti di menu_, quindi degli _accessi in lettura_, che in media sono 5 a comanda.
+La compilazione delle _comande_ richiede delle ricerche di _prodotti di menu_, che in media sono 3 a comanda, successivamente occorrono degli accessi in lettura alle _variazioni_, degli aggiornamenti nei _prodotti al tavolo_ e degli accessi in scrittura nelle _richieste aggiuntive_.
 
 | \bluerow\ **Concetto** | **Costrutto** | **Accessi** | **Tipo** |
-|:----------------------:|:-------------:|:-----------:|---------:|
-| Menu Product           | E             | 5           | L        |
+|:-----------------------|:-------------:|:-----------:|---------:|
+| Menu Product           | E             | 3           | L        |
+| Variation              | E             | 3           | L        |
+| additional request     | R             | 3           | S        |
+| Product In Table       | E             | 3           | L        |
+| Product In Table       | E             | 3           | S        |
+| ordination             | R             | 3           | S        |
 | Customer Order         | E             | 1           | S        |
-| \lbluerow              | **Totale:**   | 1S + 5L → 5600 all'anno|
+| \lbluerow              | **Totale:**   | 10S + 9L → 23.200 a settimana |
 
 ### Operazione 4 - Mostrare le comande non completate in ordine di arrivo
+
+Considerando 3 prodotti per comanda bisogna accedere in lettura anche alle _ordinazioni_ per ricostruire l'intera comanda.
 
 | \bluerow\ **Concetto** | **Costrutto** | **Accessi** | **Tipo** |
 |:----------------------:|:-------------:|:-----------:|---------:|
 | \whiterow\ Customer Order | E          | 1           | L        |
-| \lbluerow              | **Totale:**   | 1L → 30 al giorno      |
+| ordination             | R             | 3           | L        
+| \lbluerow              | **Totale:**   | 4L → 120 al giorno      |
 
 ### Operazione 5 - Mostrare il numero di tavoli e clienti serviti in una sera
 
@@ -269,39 +293,40 @@ La compilazione delle _comande_ richiede delle ricerche di _prodotti di menu_, q
 
 | \bluerow\ **Concetto** | **Costrutto** | **Accessi** | **Tipo** |
 |:----------------------:|:-------------:|:-----------:|---------:|
-| \whiterow\ Menu Product | E            | 1           | L        |
-| \lbluerow              | **Totale:**   | 1L → 10 al giorno      |
+| \whiterow\ Menu Product| E             | 1           | L        |
+| Stocked Up Product     | E             | 1           | L        |
+| \lbluerow              | **Totale:**   | 2L → 20 al giorno      |
 
 ### Operazione 7 - Ricerca prodotti per nome
 
 | \bluerow\ **Concetto** | **Costrutto** | **Accessi** | **Tipo** |
 |:----------------------:|:-------------:|:-----------:|---------:|
-| \whiterow\ Menu Product | E            | 1           | L        |
-| \lbluerow              | **Totale:**   | 1L → 4000 a settimana  |
+| \whiterow\ Menu Product| E             | 1           | L        |
+| Stocked Up Product     | E             | 1           | L        |
+| \lbluerow              | **Totale:**   | 2L → 8000 a settimana  |
 
 ### Operazione 8 - Visualizzare prodotti non pagati in un tavolo
 
-Per visualizzare i prodotti non pagati è sufficiente accedere prima al _tavolo_ e successivamente ai _prodotti ordinati_, che in media in un _tavolo_ sono 5.
+Per visualizzare i prodotti non pagati è sufficiente accedere prima al _tavolo_ e successivamente ai _prodotti nel tavolo_, che in media in un _tavolo_ sono 5.
 
 | \bluerow\ **Concetto** | **Costrutto** | **Accessi** | **Tipo** |
 |:----------------------:|:-------------:|:-----------:|---------:|
 | Table                  | E             | 1           | L        |
-| Ordered Product        | E             | 5           | L        |
+| Product In Table       | E             | 5           | L        |
 | \lbluerow              | **Totale:**   | 6L → 14.400 a settimana|
 
 ### Operazione 9 - Compilare scontrini
 
-Per compilare uno _scontrino_ è necessario innazitutto una _visualizzazione dei prodotti non pagati in un tavolo_. Successivamente è necessario leggerne il _prezzo_ dai relativi _prodotti in menu_ e successivamente aggiungere dei _prodotti pagati_, in media 2 per _scontrino_, e aggiornare l'attributo _numPaid_ nei relativi _prodotti ordinati_.
+Per compilare uno _scontrino_ è necessario innazitutto una visualizzazione dei prodotti non pagati in un tavolo. Successivamente bisogna aggiungere dei _prodotti pagati_, in media 3 per _scontrino_, e aggiornare l'attributo _numPaid_ nei relativi _prodotti ordinati_.
 
 | \bluerow\ **Concetto** | **Costrutto** | **Accessi** | **Tipo** |
 |:----------------------:|:-------------:|:-----------:|---------:|
 | Receipt                | E             | 1           | S        |
 | Table                  | E             | 1           | L        |
-| Ordered Product        | E             | 5           | L        |
-| Menu Product           | E             | 2           | L        |
-| Paid Product           | E             | 2           | S        |
-| Ordered Product        | E             | 2           | S        |
-| \lbluerow              | **Totale:**   | 5S + 8L → 10.800 a settimana |
+| Product In Table       | E             | 5           | L        |
+| Paid Product           | E             | 3           | S        |
+| Product In Table       | E             | 3           | S        |
+| \lbluerow              | **Totale:**   | 7S + 8L → 13.200 a settimana |
 
 ### Operazione 10 - Visualizzare i guadagni in un dato periodo
 
@@ -328,17 +353,17 @@ Occorre poi creare gli _elementi di fornitura_ con le quantità scelte.
 
 ### Operazione 12 - Visualizzare le spese per i rifornimenti in un dato periodo
 
-Considerando come riferimento una settimana[^3]:
+Considerando come riferimento una settimana[^10]:
 
-[^3]: Ci si attiene alle stime fatte precedentemente, che erano su base settimanale. Il costo può essere moltiplicato per trovare la stima mensile e/o annuale.
-[^4]: Se si volesse ottenere il costo di una lettura su base mensile fatta 3 volte a settimana il costo diventerebbe:  
+[^10]: Ci si attiene alle stime fatte precedentemente, che erano su base settimanale. Il costo può essere moltiplicato per trovare la stima mensile e/o annuale.
+[^11]: Se si volesse ottenere il costo di una lettura su base mensile fatta 3 volte a settimana il costo diventerebbe:  
         _Totale = 63L * 4 * 3 = 756 a settimana_
 
 | \bluerow\ **Concetto** | **Costrutto** | **Accessi** | **Tipo** |
 |:----------------------:|:-------------:|:-----------:|---------:|
 | Stock Order            | E             | 3           | L        |
 | Supply Item            | E             | 60          | L        |
-| \lbluerow              | **Totale:**   | 63L[^4] →     189 a settimana |
+| \lbluerow              | **Totale:**   | 63L[^11] →     189 a settimana |
 
 ### Operazione 13 - Visualizzare le prenotazioni per un dato giorno
 
@@ -358,7 +383,8 @@ Per ogni _prodotto in menu_ consideriamo una media di 3 _ingredienti_, come già
 |:----------------------:|:-------------:|:-----------:|---------:|
 | Menu Product           | E             | 1           | L        |
 | Stocked Up Product     | E             | 3           | L        |
-| \lbluerow              | **Totale:**   | 4L → 80 al giorno      |
+| ingredient             | R             | 3           | L        |
+| \lbluerow              | **Totale:**   | 7L → 140 al giorno     |
 
 ### Operazione 15 - Aggiornare staff del locale
 
@@ -366,4 +392,130 @@ Per ogni _prodotto in menu_ consideriamo una media di 3 _ingredienti_, come già
 |:----------------------:|:-------------:|:-----------:|---------:|
 | Employee               | E             | 1           | S        |
 | \lbluerow              | **Totale:**   | 1S → 10 all'anno       |
+
+## Riepilogo dei costi stimati per operazione
+
+Di seguito viene stilata una tabella riassuntiva coi costi sopraelencati:
+
+|\bluerow\ **Indice**  | **Operazione**                                              | **Frequenza**      | **Costo stimato** |
+|:--------------------------------|:------------------------------------------------------------|:-------------------|:------------------|
+| 1.                              | Aggiornare prodotti                                         | 50 all'anno        | 500 all'anno      |
+| 2.                              | Aggiungere tavoli                                           | 200 a settimana    | 400 a settimana   |
+| 3.                              | Compilare comande                                           | 800 a settimana    | 23.200 a settimana  | 
+| 4.                              | Mostrare le comande non completate in ordine di arrivo      | 30 al giorno       | 120 al girono      |
+| 5.                              | Mostare il numero di tavoli e clienti serviti in una sera   | 2 al giorno        | 2 al giorno       |
+| 6.                              | Ricerca prodotti per categorie e sottocategorie             | 10 al giorno       | 20 al giorno      |
+| 7.                              | Ricerca prodotti per nome                                   | 4000 a settimana   | 8000 a settimana  |
+| 8.                              | Visualizzare prodotti non pagati in un tavolo               | 2400 a settimana   | 14.400 a settimana|
+| 9.                              | Compilare scontrini                                         | 600 a settimana    | 13.200 a settimana|
+| 10.                             | Visualizzare i guadagni in un dato periodo                  | 10 al mese         | 10 al mese        |
+| 11.                             | Compilare ordini del magazzino                              | 3 a settimana      | 258 a settimana   |
+| 12.                             | Visualizzare le spese per i rifornimenti in un dato periodo | 10 al mese         | 189 a settimana   |
+| 13.                             | Visualizzare le prenotazioni per un dato giorno             | 100 a settimana    | 200 a settimana   |
+| 14.                             | Visualizzare la ricetta di un prodotto                      | 20 al giorno       | 140 al giorno      |
+| 15.                             | Aggiornare staff del locale                                 | 5 all'anno         | 10 all'anno       |
+
+## Raffinamento dello schema
+
+### Eliminazione delle gerarchie
+
+Per la gerarchia dei _dipendenti_, poiché la copertura è sovrapposta e le diverse specializzazioni non presentano attributi aggiuntivi, ma si configurano più come delle specie di permessi per effettuare determinate operazioni, si è scelto il collasso verso l'alto, aggiungendo all'entità _dipendente_ tanti attributi booleani quante sono le specializzazioni.
+
+Per la gerarchia dei _prodotti_ si è invece scelto un collasso verso il basso, replicando gli attributi di _prodotto_ in _prodotto in menu_ e _prodotto in magazzino_. Si adotta questa strategia in quanto la ridondanza, essendo non esclusiva, è presente, ma effettivamente trascurabile. La quantità di prodotti che sono sia prodotti da magazzino che prodotti in menù è infatti scarsa (ad esempio bevande e pochi altri prodotti). Inoltre le operazioni svolte sui prodotti in menù vengono effettuate molto più spesso di quanto venga fatto per i prodotti in magazzino.
+
+### Eliminazione attributi composti
+
+Nello schema è presente l'attributo composto _indirizzo_ nell'entità _dipendente_. 
+Tale attributo è stato diviso nelle sue sotto componenti, si renderà necessario poi, a livello applicativo, che tali valori siano impostati in modo coerente tra loro.
+
+### Eliminazione degli identificatori esterni
+Nello schema E/R sono eliminate le seguenti relazioni:
+
+- **ingredient**: reificata importando _prodId_ da _Menu Product_ e _ingredientId_ da _Stocked Up Product_
+- **based on**: eliminata importando _prodId_ da _Menu Product_ a _Ordered Product_
+- **customer choice**: eliminata importando _prodId_ da _Menu Product_ a _Variation_
+- **additional request**: reificata importando _prodId_ da _Menu Product_ e _tableId_
+- **ordination**: reificata importando _prodId_ da _Menu Product_, _orderNum_ da _Customer Order_ e _tableId_
+- **assignment**: eliminata importando _tableId_ da _Table_ a _Customer Order_
+- **order composition**: eliminata importando _tableId_ in _Product in Table_
+- **product payment**: eliminata importando _orderedProdId_ da _Menu Product_ e _tableId_ in _Paid Product_
+- **order compilation**: eliminata importando _compiledBy_ da _Waiter_ a _Customer Order_
+- **receipt composition**: eliminata importando _receiptId_ da _Receipt_ a _Paid Product_
+- **table payment**: eliminata importando _tableId_ in _Receipt_
+- **request**: eliminata importando _tableId_ da _Table_ a _Reservation_
+- **supply**: reificata importando _prodId_ da _Stocked Up Product_ e _supplierName_ da _Supplier_
+- **type**: eliminata importando _prodId_ da _Stocked Up Product_ a _Supply Item_
+- **provision**: eliminata importando _supplierName_ da _Supplier_ a _Supply Item_
+- **inclusion**: eliminata importando _orderId_ da _Stock Order_ a _Supply Item_
+- **order planning**: eliminata importando _storekeeperId_ da _Storekeeper_ a _Stock Order_
+
+## Analisi delle ridondanze
+
+Nell'entità _Product In Table_ gli attributi _numPaid_, _quantity_ e _finalPrice_ sono ridondanze. 
+Tuttavia, a discapito di un piccolo overhead in termini di memoria si ha vantaggio nelle operazioni più eseguite, infatti:
+
+- Per reperire _numPaid_ occorrerebbero, in media, 2 accessi in lettura a _Paid Product_
+- Per ottenere _quantity_ occorrerebbero, in media, 2 accessi in lettura a _ordination_
+- Per conoscere la quantità dei **non pagati** occorrerebbero quindi almeno 4 accessi in lettura in più ogni volta
+- Per ottenere _final price_ occorrerebbe per _Product In Table_ un accesso in lettura a _Menu Product_, _additional request_ e _Variation_, quindi circa 3 accessi in lettura in più per prodotto considerando una sola variazione
+
+> **Operazione 8:**
+
+>> **con ridondanza**:
+
+>> | \bluerow\ **Concetto** | **Costrutto** | **Accessi** | **Tipo** |
+>> |:----------------------:|:-------------:|:-----------:|---------:|
+>> | Table                  | E             | 1           | L        |
+>> | Product In Table       | E             | 5           | L        |
+>> | \lbluerow              | **Totale:**   | 6L → 14.400 a settimana|
+
+    
+>> **senza ridondanza**:
+
+>> | \redrow\ **Concetto**  | **Costrutto** | **Accessi** | **Tipo** |
+>> |:----------------------:|:-------------:|:-----------:|---------:|
+>> | Table                  | E             | 1           | L        |
+>> | \llredrow\ Product In Table | E        | 5           | L        |
+>> | Paid Product           | E             | 10          | L        |
+>> | \llredrow\ ordination  | E             | 10          | L        |
+>> | \lredrow               | **Totale:**   | *26L → 62.400 a settimana* |
+
+
+> **Operazione 9:**  
+  
+>> **con ridondanza**:
+
+>> | \bluerow\ **Concetto** | **Costrutto** | **Accessi** | **Tipo** |
+>> |:----------------------:|:-------------:|:-----------:|---------:|
+>> | Receipt                | E             | 1           | S        |
+>> | Table                  | E             | 1           | L        |
+>> | Product In Table       | E             | 5           | L        |
+>> | Paid Product           | E             | 3           | S        |
+>> | Product In Table       | E             | 3           | S        |
+>> | \lbluerow              | **Totale:**   | 7S + 8L → 13.200 a settimana |
+
+
+>> **senza ridondanza**:
+
+>> | \redrow\ **Concetto**  | **Costrutto** | **Accessi** | **Tipo** |
+>> |:----------------------:|:-------------:|:-----------:|---------:|
+>> | \llredrow\ Receipt     | E             | 1           | S        |
+>> | Table                  | E             | 1           | L        |
+>> | \llredrow\ Product In Table | E        | 5           | L        |
+>> | Paid Product           | E             | 10          | L        |
+>> | \llredrow\ ordination  | E             | 10          | L        |
+>> | Paid Product           | E             | 3           | S        |
+>> | \llredrow\ Variation   | E             | 3           | L        |
+>> | additional request     | E             | 3           | L        |
+>> | \lredrow               | **Totale:**   | *4S + 32L → 24.000 a settimana* |
+
+Si può notare come in entrambe le operazioni più frequenti la ridondanza semplifichi di tanto il costo complessivo stimato.
+
+## Traduzione di entità e associazioni in relazioni
+
+
+
+
+
+
 
