@@ -18,6 +18,7 @@ output: pdf_document
 \newcommand{\redrow}{\rowcolor{BrickRed!60}}
 \newcommand{\lredrow}{\rowcolor{BrickRed!40}}
 \newcommand{\llredrow}{\rowcolor{BrickRed!15}}
+\newcommand{\und}[1]{\underline{#1}}
 \newpage
 \tableofcontents
 \newpage
@@ -431,22 +432,22 @@ Tale attributo è stato diviso nelle sue sotto componenti, si renderà necessari
 ### Eliminazione degli identificatori esterni
 Nello schema E/R sono eliminate le seguenti relazioni:
 
-- **ingredient**: reificata importando _prodId_ da _Menu Product_ e _ingredientId_ da _Stocked Up Product_
-- **based on**: eliminata importando _prodId_ da _Menu Product_ a _Ordered Product_
+- **ingredient**: reificata importando _menuProdId_ da _Menu Product_ e _ingredientId_ da _Stocked Up Product_
+- **based on**: eliminata importando _menuProdId_ da _Menu Product_ a _Product In Table_
 - **customer choice**: eliminata importando _prodId_ da _Menu Product_ a _Variation_
-- **additional request**: reificata importando _prodId_ da _Menu Product_ e _tableId_
-- **ordination**: reificata importando _prodId_ da _Menu Product_, _orderNum_ da _Customer Order_ e _tableId_
+- **additional request**: reificata importando _menuProdId_ da _Menu Product_, _tableId_, _orderedProdId_ da _Product in Table_ e _variationId_ da _Variation_
+- **ordination**: reificata importando _menuProdId_ da _Menu Product_, _orderNum_ da _Customer Order_, _orderedProdId_ da _Product In Table_ e _tableId_
 - **assignment**: eliminata importando _tableId_ da _Table_ a _Customer Order_
 - **order composition**: eliminata importando _tableId_ in _Product in Table_
-- **product payment**: eliminata importando _orderedProdId_ da _Menu Product_ e _tableId_ in _Paid Product_
-- **order compilation**: eliminata importando _compiledBy_ da _Waiter_ a _Customer Order_
+- **product payment**: eliminata importando _orderedProdId_ da _Product In Table_, _menuProdId_ da _Menu Product_ e _tableId_ in _Paid Product_
+- **order compilation**: eliminata importando _waiterId_ da _Waiter_ a _Customer Order_
 - **receipt composition**: eliminata importando _receiptId_ da _Receipt_ a _Paid Product_
 - **table payment**: eliminata importando _tableId_ in _Receipt_
 - **request**: eliminata importando _tableId_ da _Table_ a _Reservation_
 - **supply**: reificata importando _prodId_ da _Stocked Up Product_ e _supplierName_ da _Supplier_
 - **type**: eliminata importando _prodId_ da _Stocked Up Product_ a _Supply Item_
 - **provision**: eliminata importando _supplierName_ da _Supplier_ a _Supply Item_
-- **inclusion**: eliminata importando _orderId_ da _Stock Order_ a _Supply Item_
+- **inclusion**: eliminata importando _orderDate_ da _Stock Order_ a _Supply Item_
 - **order planning**: eliminata importando _storekeeperId_ da _Storekeeper_ a _Stock Order_
 
 ## Analisi delle ridondanze
@@ -513,9 +514,70 @@ Si può notare come in entrambe le operazioni più frequenti la ridondanza sempl
 
 ## Traduzione di entità e associazioni in relazioni
 
+- EMPLOYEES(\und{employeeId}, email, password, cf, name, surname, birthday, hiringDate, city, zipCode, streetName, isAdmine, isWaiter, isKitchenStaff, isStoreKeeper)
 
+- MENU_PRODUCTS(\und{prodId}, name, imgFile, category, description, subcategory, price)
 
+- STOCKED_UP_PRODUCTS(\und{prodId}, name, imgFile, category, subcategory, availability)
 
+- INGREDIENTS(\und{menuProdId}, \und{ingredientId}, portion)
 
+>> FK: menuProdId REFERENCES MENU_PRODUCTS  
+>> FK: menuProdId REFERENCES MENU_PRODUCTS
 
+- VARIATIONS(\und{variationId}, \und{menuProdId}, additionalRequest, additionalPrice*)
+
+>> FK: menuProdId REFERENCES MENU_PRODUCTS
+
+- TABLES(\und{tableId}, creationTimestamp, name, seats)
+
+- RESERVATIONS(\und{cellNumber}, \und{dateAndTime}, clientName, seats, tableId*)
+
+>> FK: tableId REFERENCES TABLES
+
+- RECEIPTS(\und{receiptId}, dateAndTime, total, paymentMethod, givenMoney\*, change\*, tableId\*)
+
+>> FK: tableId REFERENCES TABLES
+
+- PRODUCTS_IN_TABLE(\und{orderedProdId}, \und{menuProdId}, \und{tableId}, quantity, finalPrice, hasVariations, numPaid)
+
+>> FK: tableId REFERENCES TABLES  
+>> FK: menuProdId REFERENCES MENU_PRODUCTS
+
+- PAID_PRODUCTS(\und{orderedProdId}, \und{menuProdId}, \und{tableId}, \und{receiptId}, quantity)
+
+>> FK: receiptId REFERENCES RECIPTS  
+>> FK: (orderedProdId, menuProdId, tableId) REFERENCES PRODUCTS_IN_TABLE
+
+- ADDITIONAL_REQUESTS(\und{variationId}, \und{tableId}, \und{orderedProdId}, \und{menuProdId})
+
+>> FK: (variationId, menuProdId) REFERENCES VARIATIONS  
+>> FK: (orderedProdId, menuProdId, tableId) REFERENCES PRODUCTS_IN_TABLE
+
+- CUSTOMER_ORDERS(\und{orderNum}, \und{tableId}, timestamp, inPreparation, delivered, waiterId)
+
+>> FK: tabledId REFERENCES TABLES  
+>> FK: waiterId REFERENCES EMPLOYEES
+
+- ORDINATIONS(\und{orderNum}, \und{menuProdId}, \und{tableId}, \und{orderedProdId}, quantity)
+
+>> FK: (orderNum, tableId) REFERENCES CUSTOMER_ORDERS  
+>> FK: (orderedProdId, menuProdId, tableId) REFERENCES PRODUCTS_IN_TABLE
+
+- SUPPLIERS(\und{companyName}, email)
+
+- SUPPLY_COSTS(\und{prodId}, \und{companyName}, cost)
+
+>> FK: prodIs REFERENCES STOCKED_UP_PRODUCTS  
+>> FK: companyName REFERENCES SUPPLIERS
+
+- STOCK_ORDERS(\und{creationTimestamp}, sent, estimatedCost, storekeeperId)
+
+>> FK: storekeeperId REFERENCES EMPLOYEES
+
+- SUPPLY_ITEMS(\und{prodId}, \und{orderDate}, \und{supplierName}, quantity)
+
+>> FK: supplierName REFERENCES SUPPLIERS  
+>> FK: orderDate REFERENCES STOCK_ORDERS  
+>> FK: prodId REFERENCES STOCKED_UP_PRODUCTS
 
