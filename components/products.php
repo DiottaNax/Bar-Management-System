@@ -31,5 +31,5 @@ if(!isset($_GET['type']) || ($_GET['type'] != "menu" && ($_GET['type'] != "stock
     </div>
 </div>
 
-<p><?php include_once "./components/" . $_GET['type'] . "-products.php"; ?></p>
+<main class="container mt-5"><?php include_once "./components/" . $_GET['type'] . "-products.php"; ?></main>
 

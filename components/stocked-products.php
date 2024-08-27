@@ -2,6 +2,9 @@
 $products = $dbh->getAllStockedProducts();
 ?>
 
+<h1 class="mb-4">Stocked Up Products</h1>
+
+
 <div class="container px-2">
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 justify-content-center">
         <?php foreach ($products as $product): ?>

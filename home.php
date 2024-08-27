@@ -21,9 +21,9 @@ if (!isset($_GET['opt']))
 <body>
     <?php
     include_once "./components/navbar.php";
-    //include_once "./components/{$_GET['opt']}.php";
-    include_once "./components/products.php"
-        ?>
+    include_once "./components/{$_GET['opt']}.php";
+    //include_once "./components/products.php"
+    ?>
 </body>
 
 <script src="./js/Navbar.js"></script> <!-- Include to make the navbar work properly -->
