@@ -155,18 +155,17 @@ create table if not exists TABLES (
 
 create table if not exists VARIATIONS (
      variationId int auto_increment,
-     menuProdId int,
      additionalRequest varchar(512) not null,
      additionalPrice float(1),
-     constraint ID_VARIATIONS_ID primary key (variationId, menuProdId));
+     constraint ID_VARIATIONS_ID primary key (variationId));
 
 
 -- Constraints Section
 -- ___________________ 
 
 alter table ADDITIONAL_REQUESTS add constraint REF_ADDIT_VARIA_FK
-     foreign key (variationId, menuProdId)
-     references VARIATIONS(variationId, menuProdId)
+     foreign key (variationId)
+     references VARIATIONS(variationId)
      on delete cascade;
 
 alter table ADDITIONAL_REQUESTS add constraint REF_ADDIT_PRODU_FK
@@ -263,12 +262,6 @@ alter table SUPPLY_ITEMS add constraint REF_SUPPL_STOCK
      references STOCKED_UP_PRODUCTS(prodId)
      on delete cascade;
 
-alter table VARIATIONS add constraint REF_VARIA_MENU__FK
-     foreign key (menuProdId)
-     references MENU_PRODUCTS(prodId)
-     on delete cascade;
-
-
 -- Index Section
 -- _____________ 
 
@@ -276,7 +269,7 @@ create unique index ID_ADDITIONAL_REQUESTS_IND
      on ADDITIONAL_REQUESTS (variationId, tableId, orderedProdId, menuProdId);
 
 create index REF_ADDIT_VARIA_IND
-     on ADDITIONAL_REQUESTS (variationId, menuProdId);
+     on ADDITIONAL_REQUESTS (variationId);
 
 create index REF_ADDIT_PRODU_IND
      on ADDITIONAL_REQUESTS (orderedProdId, menuProdId, tableId);
@@ -366,8 +359,7 @@ create unique index ID_TABLES_IND
      on TABLES (tableId);
 
 create unique index ID_VARIATIONS_IND
-     on VARIATIONS (variationId, menuProdId);
+     on VARIATIONS (variationId);
 
-create index REF_VARIA_MENU__IND
-     on VARIATIONS (menuProdId);
-
+create unique index UNIQUE_VARIATION_REQUEST_IND
+     on VARIATIONS (additionalRequest);
