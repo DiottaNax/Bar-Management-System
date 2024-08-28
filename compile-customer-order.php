@@ -1,6 +1,5 @@
 <?php
 require_once './db-config.php';
-
 $tableId = $_GET['tableId'] ?? null;
 $waiterId = $_SESSION['employeeId'];
 
@@ -29,31 +28,34 @@ if (!$tableId) {
 </head>
 
 <body>
-    <?php var_dump($_SESSION) ?>
     <div class="container mt-5">
         <h1>New Customer Order in Table
             <?php echo htmlspecialchars($tableId); ?>
             compiled by waiter #<?php echo htmlspecialchars($waiterId); ?>
         </h1>
 
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Product ID</th>
-                    <th>Name</th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                    <th>Variations</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="orderItems">
-                <!-- Order items will be dynamically added here -->
-            </tbody>
-        </table>
+        <div class="container mt-4">
+            <table class="table table-striped table-hover">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Product ID</th>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Variations</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="orderItems">
+                    <!-- Order items will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
 
-        <button class="btn btn-primary" id="addProductBtn">Add Product</button>
-        <button class="btn btn-success mt-3" id="sendOrderBtn">Send Order</button>
+        <div class="row mt-3">
+            <button class="btn btn-primary col mx-5" id="addProductBtn">Add Product</button>
+            <button class="btn btn-success col mx-5" id="sendOrderBtn">Send Order</button>
+        </div>
     </div>
 
     <!-- Add Product Modal -->
@@ -65,7 +67,8 @@ if (!$tableId) {
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="text" class="form-control" id="productSearch" placeholder="Search products..." autocomplete="off">
+                    <input type="text" class="form-control" id="productSearch" placeholder="Search products..."
+                        autocomplete="off">
                     <div id="productResults" class="mt-3"></div>
                 </div>
             </div>
@@ -81,7 +84,8 @@ if (!$tableId) {
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="text" class="form-control" id="variationSearch" placeholder="Search variations..." autocomplete="off">
+                    <input type="text" class="form-control" id="variationSearch" placeholder="Search variations..."
+                        autocomplete="off">
                     <div id="variationResults" class="mt-3"></div>
                 </div>
             </div>

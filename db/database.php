@@ -1,7 +1,7 @@
 <?php
 class DatabaseHelper
 {
-    private mysqli $db;
+    public mysqli $db;
 
     public function __construct($dbname, $servername = "localhost", $username = "root", $password = "", $port = 3306)
     {
@@ -98,6 +98,15 @@ class DatabaseHelper
         return $stmt->execute();
     }
 
+    public function getTable(int $tableId) {
+        $query = "SELECT * FROM TABLES WHERE tableId = ? LIMIT 1";
+        $stmt = $this->db->prepare($query);
+
+        $stmt->bind_param("i", $tableId);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_assoc();
+    }
+
     public function getTables(string $date = null)
     {
         // If no date is provided, use today's date in 'Y-m-d' format
@@ -127,7 +136,8 @@ class DatabaseHelper
     public function getCustomerOrders(bool $inPreparation, bool $delivered)
     {
         $query = "SELECT 
-                        TABLES.name AS tableName, 
+                        TABLES.name AS tableName,
+                        TABLES.tableId,
                         EMPLOYEES.name AS waiterName, 
                         EMPLOYEES.surname AS waiterSurname, 
                         ord.timestamp, 
@@ -158,7 +168,7 @@ class DatabaseHelper
     }
 
 
-    private function createNewCustomerOrder(int $tableId, int $waiterId)
+    public function createNewCustomerOrder(int $tableId, int $waiterId)
     {
         // Obtain the order number (corresponds to the number of order in the table + 1)
         $query = "
@@ -188,7 +198,7 @@ class DatabaseHelper
     }
 
 
-    public function calculateFinalPrice($menuProdId, array $variationIds)
+    private function calculateFinalPrice($menuProdId, array $variationIds)
     {
         $query = "
             SELECT price 
@@ -221,15 +231,11 @@ class DatabaseHelper
         return $basePrice + $variationPrice;
     }
 
-    public function addProductToCustomerOrder($waiterId, $menuProdId, $tableId, $quantity, array $variationIds)
+    public function addProductToCustomerOrder($menuProdId, $tableId, $orderNum, $quantity, array $variationIds)
     {
-        $this->db->begin_transaction();
-
-        try {
-            $customerOrderId = $this->createNewCustomerOrder($tableId, $waiterId); // Create new customer order and save id
-            $finalPrice = $this->calculateFinalPrice($menuProdId, $variationIds); // Sum menu product's price to the variations' prices
-            // Step 1: Check if the product already exists in the table with the same variations
-            $existingProductQuery = "
+        $finalPrice = $this->calculateFinalPrice($menuProdId, $variationIds); // Sum menu product's price to the variations' prices
+        // Step 1: Check if the product already exists in the table with the same variations
+        $existingProductQuery = "
                 SELECT pit.orderedProdId
                 FROM PRODUCTS_IN_TABLE pit
                 LEFT JOIN ADDITIONAL_REQUESTS ar ON pit.orderedProdId = ar.orderedProdId 
@@ -242,26 +248,26 @@ class DatabaseHelper
                 HAVING 
                     COUNT(DISTINCT ar.variationId) = ? 
                     AND SUM(CASE WHEN ar.variationId IN (0" .
-                (!empty($variationIds) ? ',' . implode(',', array_fill(0, count($variationIds), '?')) : '') .
-                ") THEN 1 ELSE 0 END) = ?";
-            $numVariations = count($variationIds);
-            $stmt = $this->db->prepare($existingProductQuery);
-            $hasVariation = !empty($variationIds);
-            $params = array_merge([$menuProdId, $tableId, $hasVariation, $numVariations], $variationIds, [$numVariations]);
-            $stmt->bind_param(
-                str_repeat('i', count($params)),
-                ...$params
-            );
+            (!empty($variationIds) ? ',' . implode(',', array_fill(0, count($variationIds), '?')) : '') .
+            ") THEN 1 ELSE 0 END) = ?";
+        $numVariations = count($variationIds);
+        $stmt = $this->db->prepare($existingProductQuery);
+        $hasVariation = !empty($variationIds);
+        $params = array_merge([$menuProdId, $tableId, $hasVariation, $numVariations], $variationIds, [$numVariations]);
+        $stmt->bind_param(
+            str_repeat('i', count($params)),
+            ...$params
+        );
 
-            $stmt->execute();
-            $result = $stmt->get_result(); // Id product somebody already ordered it in the same table or else empty array;
+        $stmt->execute();
+        $result = $stmt->get_result(); // Id product somebody already ordered it in the same table or else empty array;
 
-            if ($result->num_rows > 0) {
-                // Product exists, update quantity
-                $row = $result->fetch_assoc();
-                $orderedProdId = $row['orderedProdId'];
+        if ($result->num_rows > 0) {
+            // Product exists, update quantity
+            $row = $result->fetch_assoc();
+            $orderedProdId = $row['orderedProdId'];
 
-                $updateQuery = "
+            $updateQuery = "
                     UPDATE PRODUCTS_IN_TABLE 
                     SET quantity = quantity + ?
                     WHERE orderedProdId = ? 
@@ -269,51 +275,44 @@ class DatabaseHelper
                         AND tableId = ?
                 ";
 
-                $stmt = $this->db->prepare($updateQuery);
-                $stmt->bind_param("iiii", $quantity, $orderedProdId, $menuProdId, $tableId);
-                $stmt->execute();
-            } else {
-                // Product doesn't exist, insert new
-                $insertProductQuery = "
+            $stmt = $this->db->prepare($updateQuery);
+            $stmt->bind_param("iiii", $quantity, $orderedProdId, $menuProdId, $tableId);
+            $stmt->execute();
+        } else {
+            // Product doesn't exist, insert new
+            $insertProductQuery = "
                     INSERT INTO PRODUCTS_IN_TABLE (menuProdId, tableId, quantity, finalPrice, hasVariation, numPaid)
                     VALUES (?, ?, ?, ?, ?, 0)
                 ";
-                $stmt = $this->db->prepare($insertProductQuery);
-                $stmt->bind_param("iiidi", $menuProdId, $tableId, $quantity, $finalPrice, $hasVariation);
-                $stmt->execute();
-                $orderedProdId = $this->db->insert_id;
-                // Insert variations if any
-                if (!empty($variationIds)) {
-                    $insertVariationQuery = "
+            $stmt = $this->db->prepare($insertProductQuery);
+            $stmt->bind_param("iiidi", $menuProdId, $tableId, $quantity, $finalPrice, $hasVariation);
+            $stmt->execute();
+            $orderedProdId = $this->db->insert_id;
+            // Insert variations if any
+            if (!empty($variationIds)) {
+                $insertVariationQuery = "
                         INSERT INTO ADDITIONAL_REQUESTS (variationId, tableId, orderedProdId, menuProdId)
                         VALUES (?, ?, ?, ?)
                     ";
 
-                    $stmt = $this->db->prepare($insertVariationQuery);
-                    foreach ($variationIds as $variationId) {
-                        $stmt->bind_param("iiii", $variationId, $tableId, $orderedProdId, $menuProdId);
-                        $stmt->execute();
-                    }
+                $stmt = $this->db->prepare($insertVariationQuery);
+                foreach ($variationIds as $variationId) {
+                    $stmt->bind_param("iiii", $variationId, $tableId, $orderedProdId, $menuProdId);
+                    $stmt->execute();
                 }
             }
+        }
 
-            // Step 2: Update or insert into ORDINATIONS
-            $ordinationQuery = "
+        // Step 2: Update or insert into ORDINATIONS
+        $ordinationQuery = "
                 INSERT INTO ORDINATIONS (orderNum, menuProdId, tableId, orderedProdId, quantity)
                 VALUES (?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity)
             ";
 
-            $stmt = $this->db->prepare($ordinationQuery);
-            $stmt->bind_param("iiiii", $customerOrderId, $menuProdId, $tableId, $orderedProdId, $quantity);
-            $stmt->execute();
-
-            $this->db->commit();
-            return ['success' => true, 'message' => "product added successfully"];
-        } catch (Exception $error) {
-            $this->db->rollback();
-            return ['success' => false, 'message' => $error->getMessage()];
-        }
+        $stmt = $this->db->prepare($ordinationQuery);
+        $stmt->bind_param("iiiii", $orderNum, $menuProdId, $tableId, $orderedProdId, $quantity);
+        $stmt->execute();
     }
 
     public function searchVariations(string $variationName)
@@ -329,12 +328,154 @@ class DatabaseHelper
 
     public function searchMenuProduct($prodName)
     {
-        $stmt = $this->db->prepare("SELECT * FROM MENU_PRODUCTS WHERE name LIKE ?");
+        // Prepara i pattern di ricerca
+        $startsWithPattern = $prodName . "%";
+        $containsPattern = "%" . $prodName . "%";
 
-        $namePattern = $prodName . "%";
-        $stmt->bind_param("s", $namePattern);
+        // Crea la query combinata con UNION
+        $query = "
+        (SELECT * FROM MENU_PRODUCTS WHERE name LIKE ?)
+        UNION
+        (SELECT * FROM MENU_PRODUCTS WHERE name LIKE ?)
+        UNION
+        (SELECT * FROM MENU_PRODUCTS WHERE category LIKE ?)
+        UNION
+        (SELECT * FROM MENU_PRODUCTS WHERE subcategory LIKE ?)
+    ";
+
+        $stmt = $this->db->prepare($query);
+
+        // Binding dei parametri per ciascuna parte della query
+        $stmt->bind_param("ssss", $startsWithPattern, $containsPattern, $containsPattern, $containsPattern);
+
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+
+    private function getVariations(int $orderedProdId, int $tableId, $menuProdId)
+    {
+        $query = "
+            SELECT  v.additionalRequest as name, v.additionalPrice 
+            FROM ADDITIONAL_REQUESTS ar
+                LEFT JOIN VARIATIONS v ON ar.variationId = v.variationId
+            WHERE ar.tableId = ?
+                AND ar.orderedProdId = ?
+                AND ar.menuProdId = ?
+        ";
+
+        $stmt = $this->db->prepare($query);
+
+        $stmt->bind_param("iii", $tableId, $orderedProdId, $menuProdId);
         $stmt->execute();
         $result = $stmt->get_result();
         return $result->fetch_all(MYSQLI_ASSOC);
     }
+
+    public function getCustomerOrderItems($orderNum, $tableId)
+    {
+        $query = "
+            SELECT o.*, mp.name, pit.finalPrice
+            FROM ORDINATIONS o
+                RIGHT JOIN MENU_PRODUCTS mp ON o.menuProdId = mp.prodId
+                LEFT JOIN PRODUCTS_IN_TABLE pit ON
+                    o.orderedProdId = pit.orderedProdId 
+                    AND o.menuProdId = pit.menuProdId 
+                    AND o.tableId = pit.tableId
+            WHERE o.tableId = ? 
+                AND o.orderNum = ?;
+        ";
+        $stmt = $this->db->prepare($query);
+
+        $stmt->bind_param("ii", $tableId, $orderNum);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $products = $result->fetch_all(MYSQLI_ASSOC);
+
+        foreach($products as &$product) {
+            $product['variations'] = $this->getVariations($product['orderedProdId'], $product['tableId'], $product['menuProdId']);
+        }
+
+        return $products;
+    }
+
+    public function getUnpaidProducts($tableId) {
+        $query = "
+            SELECT pit.*, mp.name as prodName, t.name as tableName
+            FROM PRODUCTS_IN_TABLE pit
+                LEFT JOIN MENU_PRODUCTS mp ON pit.menuProdId = mp.prodId
+                LEFT JOIN TABLES t ON pit.tableId = t.tableId
+            WHERE pit.tableId = ?
+                AND (pit.quantity - pit.numPaid) > 0;";
+        $stmt = $this->db->prepare($query);
+
+        $stmt->bind_param("i", $tableId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $products = $result->fetch_all(MYSQLI_ASSOC);
+
+        foreach ($products as &$product) {
+            $product['variations'] = $this->getVariations($product['orderedProdId'], $product['tableId'], $product['menuProdId']);
+        }
+
+        return $products;
+    }
+
+    public function addNewReceipt($total, $paymentMethod, $givenMoney, $changeAmount, $tableId) {
+        $query = "
+            INSERT INTO RECEIPTS(total, paymentMethod, givenMoney, changeAmount, tableId) 
+            VALUES (?, ?, ?, ?, ?);";
+        $stmt = $this->db->prepare($query);
+
+        $stmt->bind_param("dsddi", $total, $paymentMethod, $givenMoney, $changeAmount, $tableId);
+        $stmt->execute();
+        return $this->db->insert_id;
+    }
+
+    public function addNewPaidProduct($orderedProdId, $menuProdId, $tableId, $receiptId, $quantity) {
+        $query = "
+            INSERT INTO PAID_PRODUCTS (orderedProdId, menuProdId, tableId, receiptId, quantity) 
+            VALUES (?, ?, ?, ?, ?)";
+        $stmt = $this->db->prepare($query);
+
+        $stmt->bind_param("iiiii", $orderedProdId, $menuProdId, $tableId, $receiptId, $quantity);
+        $result = $stmt->execute();
+
+        $query = "
+            UPDATE PRODUCTS_IN_TABLE 
+            SET numPaid = numPaid + ?
+            WHERE orderedProdId = ?
+                AND menuProdId = ?
+                AND tableId = ?";
+        $stmt = $this->db->prepare($query);
+
+        $stmt->bind_param("iiii", $quantity, $orderedProdId, $menuProdId, $tableId);
+        return $result && $stmt->execute();
+    }
+
+    public function getSalesInfo($startDate, $endDate)
+    {
+        $query = "
+        SELECT 
+            DATE(dateAndTime) as receiptDate, 
+            SUM(total) as totalSum,
+            COUNT(*) as totalPayment
+        FROM 
+            RECEIPTS
+        WHERE 
+            DATE(dateAndTime) >= ?
+            AND DATE(dateAndTime) <= ?
+        GROUP BY 
+            DATE(dateAndTime)
+        ORDER BY 
+            receiptDate ASC;";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("ss", $startDate, $endDate);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+    
 }

@@ -28,6 +28,9 @@ if (!empty($data['orderItems'])) {
     $orderItems = $data['orderItems'];
 
     try {
+        $dbh->db->begin_transaction(); // Start transaction
+        $orderNum = $dbh->createNewCustomerOrder($tableId, $waiterId); // Create customer order
+
         foreach ($orderItems as $item) {
             $menuProdId = $item['prodId'];
             $quantity = $item['quantity'];
@@ -36,15 +39,13 @@ if (!empty($data['orderItems'])) {
 
             $params = array_merge([$menuProdId, $tableId, 1, count($variations)], $variations, [count($variations)]);
 
-            $result = $dbh->addProductToCustomerOrder($waiterId, $menuProdId, $tableId, $quantity, $variations);
-
-            if (!$result['success']) {
-                throw new Exception("Failed to add product to order: " . $result['message']);
-            }
+            $dbh->addProductToCustomerOrder($menuProdId, $tableId, $orderNum, $quantity, $variations); // Add each product to the customer order
         }
 
+        $dbh->db->commit();
         echo json_encode(['success' => true, 'message' => 'Order added successfully']);
     } catch (Exception $error) {
+        $dbh->db->rollback();
         http_response_code(500);
         echo json_encode(['error' => "Error while adding product to customer order:\n\t" . $error->getMessage()]);
     }

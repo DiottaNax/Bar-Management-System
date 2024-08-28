@@ -3,29 +3,33 @@ document.addEventListener("DOMContentLoaded", function () {
     let html = "";
     orderItems.forEach((item, index) => {
       html += `
-            <tr>
-                <td>${item.prodId}</td>
-                <td>${item.name}</td>
-                <td>$${item.price}</td>
-                <td><input type="number" class="form-control quantity-input" value="${
-                  item.quantity
-                }" min="1" data-index="${index}"></td>
-                <td>
-                    <ul>
-                        ${item.variations
-                          .map(
-                            (v) =>
-                              `<li>${v.name} (+$${v.additionalPrice.toFixed(
-                                2
-                              )})</li>`
-                          )
-                          .join("")}
-                    </ul>
-                    <button class="btn btn-sm btn-secondary add-variation" data-index="${index}">Add Variations</button>
-                </td>
-                <td><button class="btn btn-sm btn-danger remove-item" data-index="${index}">Remove</button></td>
-            </tr>
-        `;
+                <tr>
+                    <td>${item.prodId}</td>
+                    <td>${item.name}</td>
+                    <td>$${item.price}</td>
+                    <td>
+                        <input type="number" class="form-control form-control-sm quantity-input" value="${
+                          item.quantity
+                        }" min="1" data-index="${index}">
+                    </td>
+                    <td>
+                        <ul class="list-unstyled mb-0">
+                            ${item.variations
+                              .map(
+                                (v) =>
+                                  `<li>${v.name} (+$${v.additionalPrice.toFixed(
+                                    2
+                                  )})</li>`
+                              )
+                              .join("")}
+                        </ul>
+                        <button class="btn btn-sm btn-primary add-variation" data-index="${index}">Add Variations</button>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-danger remove-item" data-index="${index}">Remove</button>
+                    </td>
+                </tr>
+            `;
     });
     $("#orderItems").html(html);
 

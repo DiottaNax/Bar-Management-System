@@ -6,44 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const tableContainer = document.getElementById("table-container");
 
   dateSelector.addEventListener("change", function () {
-    const selectedDate = this.value;
-
-    // Use AJAX to fetch tables for the selected date
-    fetch(`./api/get_tables.php?date=${selectedDate}`)
-      .then((response) => response.json())
-      .then((tables) => {
-        tableContainer.innerHTML = "";
-
-        tables.forEach((table) => {
-          const tableHtml = `
-                        <div class="col">
-                            <div class="card h-100">
-                                <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title">Table ${
-                                      table.name
-                                    }</h5>
-                                    <p class="card-text">Seats: ${
-                                      table.seats
-                                    }</p>
-                                    <p class="card-text">Created: ${new Date(
-                                      table.creationTimestamp
-                                    ).toLocaleString()}</p>
-                                    <div class="mt-auto">
-                                        <a href="#" class="btn btn-primary me-2" data-table-id="${
-                                          table.tableId
-                                        }">Add Products</a>
-                                        <a href="#" class="btn btn-success" data-table-id="${
-                                          table.tableId
-                                        }">Pay</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-          tableContainer.insertAdjacentHTML("beforeend", tableHtml);
-        });
-      })
-      .catch((error) => console.error("Error:", error));
+    window.location.href = "?date=" + this.value;
   });
 
   /**

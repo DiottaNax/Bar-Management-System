@@ -15,7 +15,7 @@ switch ($orderStatus) {
 }
 ?>
 
-<main class="container mt-5">
+<main class="container mt-5 mb-5">
     <h1 class="mb-4">Customer Orders</h1>
 
     <div class="row mb-4">
@@ -40,25 +40,49 @@ switch ($orderStatus) {
                 <div class="card h-100">
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title">Order #<?php echo htmlspecialchars($order['numOfDay']); ?></h5>
-                        <p class="card-text">Table: <?php echo htmlspecialchars($order['tableName']); ?></p>
-                        <p class="card-text">Time: <?php echo date('F j, Y, g:i a', strtotime($order['timestamp'])); ?>
-                        </p>
-                        <p class="card-text">Status:
-                            <?php
-                            if ($order['delivered']) {
-                                echo 'Delivered';
-                            } elseif ($order['inPreparation']) {
-                                echo 'In Preparation';
-                            } else {
-                                echo 'To Prepare';
-                            }
-                            ?>
-                        </p>
-                        <p class="card-text">Waiter: <?php echo htmlspecialchars($order['waiterName'] . " " . $order['waiterSurname']); ?></p>
+                        <div class="card-text px-3">
+                            <div class="row mt-2 mb-1">
+                                <div class="col">
+                                    <h6 class="d-inline">Table: </h6>
+                                    <span><?php echo htmlspecialchars($order['tableName']); ?></span>
+                                </div>
+                            </div>
+                            <div class="row mb-1">
+                                <div class="col">
+                                    <h6 class="d-inline">Time: </h6>
+                                    <span><?php echo date('F j, Y, g:i a', strtotime($order['timestamp'])); ?></span>
+                                </div>
+                            </div>
+                            <div class="row mb-1">
+                                <div class="col">
+                                    <h6 class="d-inline">Status: </h6>
+                                    <span>
+                                        <?php
+                                        if ($order['delivered']) {
+                                            echo 'Delivered';
+                                        } elseif ($order['inPreparation']) {
+                                            echo 'In Preparation';
+                                        } else {
+                                            echo 'To Prepare';
+                                        }
+                                        ?>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <h6 class="d-inline">Waiter: </h6>
+                                    <span><?php echo htmlspecialchars($order['waiterName'] . " " . $order['waiterSurname']); ?></span>
+                                </div>
+                            </div>
+                        </div>
                         <div class="mt-auto">
                             <?php if (!$order['delivered']): ?>
                                 <?php if (!$order['inPreparation']): ?>
-                                    <a href="#" class="btn btn-primary me-2" data-order-id="<?php echo $order['orderNum']; ?>">Start
+                                    <a class="btn btn-primary me-2"
+                                        href="./view-customer-order.php?orderNum=<?php echo $order['orderNum'] ?>&tableId=<?php echo $order['tableId'] ?>"
+                                        target="_blank">Open Order</a>
+                                    <a href="#" class="btn btn-success me-2" data-order-id="<?php echo $order['orderNum']; ?>">Start
                                         Preparation</a>
                                 <?php else: ?>
                                     <a href="#" class="btn btn-success" data-order-id="<?php echo $order['orderNum']; ?>">Mark

@@ -1,29 +1,44 @@
 <main class="container mt-5">
     <h1 class="mb-4">Table Management</h1>
 
+    <?php
+    // Determina la data da utilizzare
+    $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
+    
+    // Valida la data
+    $dateObj = DateTime::createFromFormat('Y-m-d', $date);
+    if (!$dateObj || $dateObj->format('Y-m-d') !== $date) {
+        $date = date('Y-m-d'); // Se la data non è valida, usa la data odierna
+    }
+    ?>
+
     <div class="row mb-4">
         <div class="col-md-6">
             <label for="date-selector" class="form-label">Select Date:</label>
-            <input type="date" id="date-selector" class="form-control" value="<?php echo date('Y-m-d'); ?>">
+            <input type="date" id="date-selector" class="form-control" value="<?php echo $date; ?>">
         </div>
     </div>
 
     <div id="table-container" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         <?php
-        $tables = $dbh->getTables(); // Using today's date by default
+        $tables = $dbh->getTables($date); // Passa la data selezionata
         foreach ($tables as $table):
             ?>
             <div class="col">
                 <div class="card h-100">
                     <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">#<?php echo $table['numOfDay'] ?>  Table <?php echo htmlspecialchars($table['name']); ?></h5>
+                        <h5 class="card-title">#<?php echo $table['numOfDay'] ?> Table
+                            <?php echo htmlspecialchars($table['name']); ?></h5>
                         <p class="card-text">Seats: <?php echo htmlspecialchars($table['seats']); ?></p>
                         <p class="card-text">Created:
-                            <?php echo date('F j, Y, g:i a', strtotime($table['creationTimestamp'])); ?></p>
+                            <?php echo date('F j, Y, g:i a', strtotime($table['creationTimestamp'])); ?>
+                        </p>
                         <div class="mt-auto">
-                            <a href="./compile-customer-order.php?tableId=<?php echo $table['tableId']; ?>" class="btn btn-primary me-2" data-table-id="<?php echo $table['tableId']; ?>">Add
+                            <a target="_blank" href="./compile-customer-order.php?tableId=<?php echo $table['tableId']; ?>&date=<?php echo $date; ?>"
+                                class="btn btn-primary me-2" data-table-id="<?php echo $table['tableId']; ?>">Add
                                 Products</a>
-                            <a href="#" class="btn btn-success" data-table-id="<?php echo $table['tableId']; ?>">Pay</a>
+                            <a target="_blank" href="./view-unpaid-products.php?tableId=<?php echo $table['tableId']; ?>&date=<?php echo $date; ?>"
+                                class="btn btn-success" data-table-id="<?php echo $table['tableId']; ?>">Pay</a>
                         </div>
                     </div>
                 </div>
@@ -64,7 +79,7 @@
                 <form id="add-table-form">
                     <div class="mb-3">
                         <label for="table-name" class="form-label">Table Name</label>
-                        <input type="text" class="form-control" id="table-name" name="name" required>
+                        <input type="text" class="form-control" id="table-name" name="name" autocomplete="off" required>
                     </div>
                     <div class="mb-3">
                         <label for="table-seats" class="form-label">Number of Seats</label>
