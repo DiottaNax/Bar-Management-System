@@ -2,7 +2,19 @@
 $products = $dbh->getAllStockedProducts();
 ?>
 
-<h1 class="mb-4">Stocked Up Products</h1>
+<div class="row align-items-center mb-4">
+    <div class="col-md-6">
+        <h1>Stocked Up Products</h1>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <label for="product-type" class="form-label me-2">View:</label>
+        <select id="product-type" class="form-select d-inline-block w-auto" onchange="window.location.href=this.value;">
+            <option value="./home.php?opt=products&type=menu" <?php echo $_GET['type'] == 'menu' ? 'selected' : ''; ?>>
+                Menu</option>
+            <option value="./home.php?opt=products&type=stocked" <?php echo $_GET['type'] == 'stocked' ? 'selected' : ''; ?>>Stocked Up</option>
+        </select>
+    </div>
+</div>
 
 
 <div class="container px-2">
@@ -24,19 +36,16 @@ $products = $dbh->getAllStockedProducts();
                                 </div>
                                 <div class="mb-2">
                                     <span
-                                        class="badge rounded-pill text-bg-primary me-1"><?php echo $product['category'] ?></span>
+                                        class="badge rounded-pill bg-primary me-1"><?php echo $product['category'] ?></span>
                                     <?php if (isset($product['subcategory'])): ?>
                                         <span
-                                            class="badge rounded-pill text-bg-info"><?php echo $product['subcategory'] ?></span>
+                                            class="badge rounded-pill bg-info"><?php echo $product['subcategory'] ?></span>
                                     <?php endif; ?>
                                 </div>
 
                                 <div class="card-text flex-grow-1" style="overflow-y: auto;">
                                     <p>Stock Availability: <?php echo $product['availability'] ?></p>
                                 </div>
-                                <a href="#" type="toast-trigger" class="btn btn-primary mt-auto"
-                                    prod-id="<?php echo $product['prodId'] ?>"
-                                    prod-name=" <?php echo $product['name'] ?>">View Recipe</a>
                             </div>
                         </div>
                     </div>
@@ -45,3 +54,9 @@ $products = $dbh->getAllStockedProducts();
         <?php endforeach; ?>
     </div>
 </div>
+
+<script>
+    document.getElementById('product-type').addEventListener('change', function () {
+        window.location.href = this.value;
+    });
+</script>

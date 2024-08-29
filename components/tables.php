@@ -4,7 +4,7 @@
     <?php
     // Determina la data da utilizzare
     $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
-    
+
     // Valida la data
     $dateObj = DateTime::createFromFormat('Y-m-d', $date);
     if (!$dateObj || $dateObj->format('Y-m-d') !== $date) {
@@ -26,18 +26,23 @@
             ?>
             <div class="col">
                 <div class="card h-100">
+                    <div class="card-header py-2">
+                        <h5 class="card-title pt-2">#<?php echo $table['numOfDay'] ?> Table
+                            <?php echo htmlspecialchars($table['name']); ?>
+                        </h5>
+                    </div>
                     <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">#<?php echo $table['numOfDay'] ?> Table
-                            <?php echo htmlspecialchars($table['name']); ?></h5>
                         <p class="card-text">Seats: <?php echo htmlspecialchars($table['seats']); ?></p>
                         <p class="card-text">Created:
                             <?php echo date('F j, Y, g:i a', strtotime($table['creationTimestamp'])); ?>
                         </p>
                         <div class="mt-auto">
-                            <a target="_blank" href="./compile-customer-order.php?tableId=<?php echo $table['tableId']; ?>&date=<?php echo $date; ?>"
+                            <a target="_blank"
+                                href="./compile-customer-order.php?tableId=<?php echo $table['tableId']; ?>&date=<?php echo $date; ?>"
                                 class="btn btn-primary me-2" data-table-id="<?php echo $table['tableId']; ?>">Add
                                 Products</a>
-                            <a target="_blank" href="./view-unpaid-products.php?tableId=<?php echo $table['tableId']; ?>&date=<?php echo $date; ?>"
+                            <a target="_blank"
+                                href="./view-unpaid-products.php?tableId=<?php echo $table['tableId']; ?>&date=<?php echo $date; ?>"
                                 class="btn btn-success" data-table-id="<?php echo $table['tableId']; ?>">Pay</a>
                         </div>
                     </div>
@@ -54,11 +59,9 @@
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body d-flex flex-column">
-        <ul class="nav flex-column mb-auto">
-            <li class="nav-item">
-                <a id="new-table-link" href="#" data-bs-toggle="modal" data-bs-target="#addTableModal">Add new table</a>
-            </li>
-        </ul>
+        <div class="list-group">
+            <a class="list-group-item list-group-item-dark list-group-item-action" id="new-table-link" href="#" data-bs-toggle="modal" data-bs-target="#addTableModal">Add new table</a>
+        </div>
         <div class="mt-auto">
             <hr>
             <button class="btn btn-danger w-100" onclick='window.location.href = "./api/logout.php"'><img
