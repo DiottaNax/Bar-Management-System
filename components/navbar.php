@@ -27,7 +27,7 @@
                     <a class="nav-link" href="./home.php?opt=graphs">Graphs</a>
                 </li>
                 <li class="nav-item" opt="profile">
-                    <a class="nav-link" href="./home.php?opt=profile">Profile</a>
+                    <a class="nav-link" href="./home.php?opt=employees">Employees</a>
                 </li>
             </ul>
         </div>

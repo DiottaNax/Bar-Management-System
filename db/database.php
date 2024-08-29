@@ -98,7 +98,8 @@ class DatabaseHelper
         return $stmt->execute();
     }
 
-    public function getTable(int $tableId) {
+    public function getTable(int $tableId)
+    {
         $query = "SELECT * FROM TABLES WHERE tableId = ? LIMIT 1";
         $stmt = $this->db->prepare($query);
 
@@ -394,14 +395,15 @@ class DatabaseHelper
         $result = $stmt->get_result();
         $products = $result->fetch_all(MYSQLI_ASSOC);
 
-        foreach($products as &$product) {
+        foreach ($products as &$product) {
             $product['variations'] = $this->getVariations($product['orderedProdId'], $product['tableId'], $product['menuProdId']);
         }
 
         return $products;
     }
 
-    public function getUnpaidProducts($tableId) {
+    public function getUnpaidProducts($tableId)
+    {
         $query = "
             SELECT pit.*, mp.name as prodName, t.name as tableName
             FROM PRODUCTS_IN_TABLE pit
@@ -423,7 +425,8 @@ class DatabaseHelper
         return $products;
     }
 
-    public function addNewReceipt($total, $paymentMethod, $givenMoney, $changeAmount, $tableId) {
+    public function addNewReceipt($total, $paymentMethod, $givenMoney, $changeAmount, $tableId)
+    {
         $query = "
             INSERT INTO RECEIPTS(total, paymentMethod, givenMoney, changeAmount, tableId) 
             VALUES (?, ?, ?, ?, ?);";
@@ -434,7 +437,8 @@ class DatabaseHelper
         return $this->db->insert_id;
     }
 
-    public function addNewPaidProduct($orderedProdId, $menuProdId, $tableId, $receiptId, $quantity) {
+    public function addNewPaidProduct($orderedProdId, $menuProdId, $tableId, $receiptId, $quantity)
+    {
         $query = "
             INSERT INTO PAID_PRODUCTS (orderedProdId, menuProdId, tableId, receiptId, quantity) 
             VALUES (?, ?, ?, ?, ?)";
@@ -477,5 +481,78 @@ class DatabaseHelper
         $stmt->execute();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
-    
+
+    public function addNewEmployee(
+        $email,
+        $password,
+        $cf,
+        $name,
+        $surname,
+        $birthday,
+        $hiringDate,
+        $isWaiter = 0,
+        $isStorekeeper = 0,
+        $isKitchenStaff = 0,
+        $isAdmin = 0,
+        $city = null,
+        $zipCode = null,
+        $streetName = null,
+        $streetNumber = null
+    ) {
+        $cf = strtoupper($cf);
+        $query = "
+            INSERT INTO EMPLOYEES(email, password, cf, name, surname, birthday, hiringDate,
+                 isWaiter, isStorekeeper, isKitchenStaff, isAdmin, 
+                 city, zipCode, streetName, streetNumber) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("sssssssiiiissss", $email, $password, $cf, $name, $surname, $birthday, $hiringDate, $isWaiter, $isStorekeeper, $isKitchenStaff, $isAdmin, $city, $zipCode, $streetName, $streetNumber);
+        return $stmt->execute();
+    }
+
+    public function deleteEmployee($employeeId)
+    {
+        $query = "DELETE FROM EMPLOYEES WHERE employeeId = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $employeeId);
+        return $stmt->execute();
+    }
+
+    private function getTypesAsString($array)
+    {
+        $arrayType = array_map(
+            function ($val) {
+                if (is_bool($val))
+                    return "b";
+                elseif (is_int($val))
+                    return "i";
+                elseif (is_double($val) || is_float($val))
+                    return "d";
+                else
+                    return "s";
+            },
+            $array
+        );
+
+        return implode("", $arrayType);
+    }
+
+    public function updateEmployee(int $employeeId, array $updateInfo)
+    {
+        $updateInfo = array_filter($updateInfo, fn($e) => isset($e) && $e != '');
+        $query = "UPDATE EMPLOYEES SET " . implode(" = ?, ", array_keys($updateInfo)) . " = ? WHERE employeeId = ?;";
+        $stmt = $this->db->prepare($query);
+        $values = array_values($updateInfo);
+        array_push($values, $employeeId);
+        $stmt->bind_param($this->getTypesAsString($updateInfo) . "i", ...$values);
+        return $stmt->execute();
+    }
+
+    public function getEmployees() {
+        $query = "SELECT * FROM EMPLOYEES";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
 }
