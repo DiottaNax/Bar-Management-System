@@ -22,7 +22,6 @@ document.addEventListener("DOMContentLoaded", () => {
         .then((response) => response.json())
         .then((data) => {
           if (data.success) {
-            alert("Product added successfully");
             location.reload(); // Reload the page to show the new product
           } else {
             alert("Failed to add product: " + data.message);
@@ -57,7 +56,6 @@ document.addEventListener("DOMContentLoaded", () => {
         .then((response) => response.json())
         .then((data) => {
           if (data.success) {
-            alert("Product updated successfully");
             location.reload(); // Reload the page to show the updated product
           } else {
             alert("Failed to update product: " + data.message);
