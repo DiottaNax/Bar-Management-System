@@ -8,7 +8,7 @@ $employees = $dbh->getEmployees();
         <?php foreach ($employees as $employee): ?>
             <div class="col">
                 <div class="card h-100">
-                    <div class="card-header">
+                    <div class="card-header text-center">
                         <h5 class="card-title my-2">
                             <?php echo htmlspecialchars($employee['name'] . ' ' . $employee['surname']); ?>
                         </h5>
@@ -53,7 +53,7 @@ $employees = $dbh->getEmployees();
                             </ul>
                         </div>
                     </div>
-                    <div class="card-footer">
+                    <div class="card-footer text-center">
                         <button class="btn btn-primary btn-sm me-2 px-3" data-bs-toggle="modal"
                             data-bs-target="#modifyEmployeeModal"
                             onclick="setEmployeeId(<?php echo $employee['employeeId']; ?>)"><img class="mb-1" src="./resources/svg/modify.svg" alt="modify icon">  Modify </button>

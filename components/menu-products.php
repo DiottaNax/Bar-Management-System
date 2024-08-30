@@ -18,7 +18,7 @@ $products = $dbh->getAllMenuProducts();
         </div>
     </div>
 
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 justify-content-center">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 justify-content-center mb-5">
         <?php foreach ($products as $product): ?>
             <div class="col">
                 <div class="card h-100 shadow-sm">
@@ -40,12 +40,44 @@ $products = $dbh->getAllMenuProducts();
                                         <span class="badge bg-info"><?php echo $product['subcategory'] ?></span>
                                     <?php endif; ?>
                                 </div>
-                                <p class="card-text flex-grow-1" style="overflow-y: auto;">
+                                <p class="card-text flex-grow-1 mb-3" style="overflow-y: auto;">
                                     <?php echo $product['description'] ?>
                                 </p>
-                                <a href="#" type="toast-trigger" class="btn btn-primary mt-auto"
-                                    prod-id="<?php echo $product['prodId'] ?>"
-                                    prod-name="<?php echo $product['name'] ?>">View Recipe</a>
+
+                                <div class="d-flex align-items-center mt-3">
+                                    <a href="#" type="toast-trigger" class="btn btn-primary"
+                                        prod-id="<?php echo $product['prodId'] ?>"
+                                        prod-name="<?php echo $product['name'] ?>">
+                                        <img class="mb-1 pe-1" src="./resources/svg/document.svg" alt="Recipe icon">Recipe
+                                    </a>
+                                    <div class="dropdown ms-1 dropend">
+                                        <button class="btn btn-warning dropdown-toggle mx-2" type="button"
+                                            id="dropdownMenuButton-<?php echo $product['prodId']; ?>"
+                                            data-bs-toggle="dropdown" aria-expanded="false">
+                                            <img class="mb-1 pe-1" src="./resources/svg/menu-black.svg" alt="Menu icon">Edit
+                                        </button>
+                                        <ul class="dropdown-menu"
+                                            aria-labelledby="dropdownMenuButton-<?php echo $product['prodId']; ?>">
+                                            <li>
+                                                <a class="dropdown-item edit-product" href="#"
+                                                    data-product-id="<?php echo $product['prodId']; ?>"
+                                                    data-bs-toggle="modal" data-bs-target="#editProductModal"
+                                                    onclick='$("#saveEditProduct").attr("data-product-id", <?php echo $product["prodId"]; ?>)'>
+                                                    <img class="mb-1 me-2" src="./resources/svg/modify-black.svg"
+                                                        alt="Modify icon"> Modify
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item delete-product" href="#" style="color: red;"
+                                                    data-product-id="<?php echo $product['prodId']; ?>">
+                                                    <img class="mb-1 me-2" src="./resources/svg/delete-red.svg"
+                                                        alt="Delete icon"> Delete
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -54,6 +86,101 @@ $products = $dbh->getAllMenuProducts();
         <?php endforeach; ?>
     </div>
 </div>
+
+
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addProductModalLabel">Add New Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addProductForm">
+                    <div class="mb-3">
+                        <label for="newProductName" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="newProductName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newProductCategory" class="form-label">Category</label>
+                        <input type="text" class="form-control" id="newProductCategory" name="category" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newProductSubcategory" class="form-label">Subcategory</label>
+                        <input type="text" class="form-control" id="newPoductSubcategory" name="subcategory" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newProductDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="newProductDescription" name="description"
+                            required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newProductPrice" class="form-label">Price</label>
+                        <input type="number" class="form-control" id="newProductPrice" step="0.50" name="price"
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newProductImage" class="form-label">Image File</label>
+                        <input type="file" class="form-control" id="newProductImage" name="imgFile">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveNewProduct">Save Product</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Product Modal -->
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProductModalLabel">Edit Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editProductForm">
+                    <div class="mb-3">
+                        <label for="editProductName" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="editProductName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProductCategory" class="form-label">Category</label>
+                        <input type="text" class="form-control" id="editProductCategory" name="category" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProductSubcategory" class="form-label">Subcategory</label>
+                        <input type="text" class="form-control" id="editPoductSubcategory" name="subcategory" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProductDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="editProductDescription" name="description"
+                            required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProductPrice" class="form-label">Price</label>
+                        <input type="number" class="form-control" id="editProductPrice" step="0.50" name="price"
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProductImage" class="form-label">Image File</label>
+                        <input type="file" class="form-control" id="editProductImage" name="imgFile">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveEditProduct">Save Modifications</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="./js/UpdateMenuProducts.js"></script>
 
 <script>
     document.getElementById('product-type').addEventListener('change', function () {

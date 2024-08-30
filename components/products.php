@@ -1,6 +1,6 @@
 <?php
 
-if(!isset($_GET['type']) || ($_GET['type'] != "menu" && ($_GET['type'] != "stocked")))
+if (!isset($_GET['type']) || ($_GET['type'] != "menu" && ($_GET['type'] != "stocked")))
     $_GET['type'] = "menu";
 ?>
 
@@ -11,13 +11,17 @@ if(!isset($_GET['type']) || ($_GET['type'] != "menu" && ($_GET['type'] != "stock
     </div>
     <div class="offcanvas-body d-flex flex-column">
         <div class="list-group">
+            <a href="#" class="list-group-item list-group-item-primary list-group-item-action" data-bs-toggle="modal"
+                data-bs-target="#addProductModal">
+                Add New Product
+            </a>
         </div>
         <div class="mt-auto">
             <hr>
-            <button class="btn btn-danger w-100" onclick='window.location.href = "./api/logout.php"'><img src="./resources/svg/logout.svg" alt="Logout"> Logout</button>
+            <button class="btn btn-danger w-100" onclick='window.location.href = "./api/logout.php"'><img
+                    src="./resources/svg/logout.svg" alt="Logout"> Logout</button>
         </div>
     </div>
 </div>
 
 <main class="container mt-5"><?php include_once "./components/" . $_GET['type'] . "-products.php"; ?></main>
-

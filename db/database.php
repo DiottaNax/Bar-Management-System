@@ -555,4 +555,76 @@ class DatabaseHelper
         $stmt->execute();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
+
+    public function addNewMenuProduct($name, $category, $subcategory, $description, $price, $imgFile = null) {
+        $query = "
+            INSERT INTO MENU_PRODUCTS
+                (name, category, subcategory, description, price";
+        $query .= !empty($imgFile) ? ", imgFile" : ""; // Add param imgFile if not empty
+        $query .= ") VALUES (?, ?, ?, ?, ?"; // Next part of the query
+        $query .= !empty($imgFile) ? ", ?);" : ");"; // Add param imgFile if not empty
+        $paramTypes = "ssssd"; // Types to add as argument in the prepared stmt
+        $paramTypes .= !empty($imgFile) ? "s" : ""; // Add type of imgFile if not empty
+        $params = array_filter([$name, $category, $subcategory, $description, $price, $imgFile], fn($e) => !is_null($e)); // If img is null array filter removes it
+        
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param($paramTypes, ...$params);
+        return $stmt->execute();
+    }
+
+    public function addNewStockedProduct($name, $category, $subcategory, $availability, $imgFile = null)
+    {
+        $query = "
+            INSERT INTO STOCKED_UP_PRODUCTS
+                (name, category, subcategory, availability";
+        $query .= !empty($imgFile) ? ", imgFile" : ""; // Add param imgFile if not empty
+        $query .= ") VALUES (?, ?, ?, ?"; // Next part of the query
+        $query .= !empty($imgFile)  ? ", ?);" : ");"; // Add param imgFile if not empty
+        $paramTypes = "sssi"; // Types to add as argument in the prepared stmt
+        $paramTypes .= !empty($imgFile) ? "s" : ""; // Add type of imgFile if not empty
+        $params = array_filter([$name, $category, $subcategory, $availability, $imgFile], fn ($e) => !is_null($e)); // If img is null array filter removes it
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param($paramTypes, ...$params);
+        return $stmt->execute();
+    }
+
+    private function updateProduct($query, $prodId, array $updateInfo) {
+        $stmt = $this->db->prepare($query);
+        $values = array_values($updateInfo);
+        array_push($values, $prodId);
+        $stmt->bind_param($this->getTypesAsString($updateInfo) . "i", ...$values);
+        return $stmt->execute();
+    }
+
+    public function updateMenuProduct(int $menuProdId, array $updateInfo)
+    {
+        $updateInfo = array_filter($updateInfo);
+        $query = "UPDATE MENU_PRODUCTS SET " . implode(" = ?, ", array_keys($updateInfo)) . " = ? WHERE prodId = ?;";
+        return $this->updateProduct($query, $menuProdId, $updateInfo);
+    }
+
+    public function updateStockedProduct(int $stockedProdId, array $updateInfo)
+    {
+        $updateInfo = array_filter($updateInfo);
+        $query = "UPDATE STOCKED_UP_PRODUCTS SET " . implode(" = ?, ", array_keys($updateInfo)) . " = ? WHERE prodId = ?;";
+        return $this->updateProduct($query, $stockedProdId, $updateInfo);
+    }
+
+    public function deleteProduct($query, $prodId) {
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $prodId);
+        return $stmt->execute();
+    }
+
+    public function deleteMenuProduct($menuProdId) {
+        $query = "DELETE FROM MENU_PRODUCTS WHERE prodId = ?";
+        return $this->deleteProduct($query, $menuProdId);
+    }
+
+    public function deleteStockedProduct($stockedProdId) {
+        $query = "DELETE FROM STOCKED_UP_PRODUCTS WHERE prodId = ?";
+        return $this->deleteProduct($query, $stockedProdId);
+    }
+    
 }

@@ -15,7 +15,7 @@
     <div class="row mb-4">
         <div class="col-md-6">
             <label for="date-selector" class="form-label">Select Date:</label>
-            <input type="date" id="date-selector" class="form-control" value="<?php echo $date; ?>">
+            <input type="date" id="date-selector" class="form-control" style="max-width: 300px;" value="<?php echo $date; ?>">
         </div>
     </div>
 
@@ -26,25 +26,25 @@
             ?>
             <div class="col">
                 <div class="card h-100">
-                    <div class="card-header py-2">
+                    <div class="card-header py-2 text-center">
                         <h5 class="card-title pt-2">#<?php echo $table['numOfDay'] ?> Table
                             <?php echo htmlspecialchars($table['name']); ?>
                         </h5>
                     </div>
-                    <div class="card-body d-flex flex-column">
-                        <p class="card-text">Seats: <?php echo htmlspecialchars($table['seats']); ?></p>
-                        <p class="card-text">Created:
+                    <div class="card-body d-flex flex-column mt-2 mx-2 px-3">
+                        <p class="card-text"><strong>Seats:</strong> <?php echo htmlspecialchars($table['seats']); ?></p>
+                        <p class="card-text"><strong>Created:</strong>
                             <?php echo date('F j, Y, g:i a', strtotime($table['creationTimestamp'])); ?>
                         </p>
-                        <div class="mt-auto">
-                            <a target="_blank"
-                                href="./compile-customer-order.php?tableId=<?php echo $table['tableId']; ?>&date=<?php echo $date; ?>"
-                                class="btn btn-primary me-2" data-table-id="<?php echo $table['tableId']; ?>">Add
-                                Products</a>
-                            <a target="_blank"
-                                href="./view-unpaid-products.php?tableId=<?php echo $table['tableId']; ?>&date=<?php echo $date; ?>"
-                                class="btn btn-success" data-table-id="<?php echo $table['tableId']; ?>">Pay</a>
-                        </div>
+                    </div>
+                    <div class="card-footer mt-2 text-center">
+                        <a target="_blank"
+                            href="./compile-customer-order.php?tableId=<?php echo $table['tableId']; ?>&date=<?php echo $date; ?>"
+                            class="btn btn-primary me-2" data-table-id="<?php echo $table['tableId']; ?>">Add
+                            Products</a>
+                        <a target="_blank"
+                            href="./view-unpaid-products.php?tableId=<?php echo $table['tableId']; ?>&date=<?php echo $date; ?>"
+                            class="btn btn-success" data-table-id="<?php echo $table['tableId']; ?>">Pay</a>
                     </div>
                 </div>
             </div>
@@ -60,7 +60,8 @@
     </div>
     <div class="offcanvas-body d-flex flex-column">
         <div class="list-group">
-            <a class="list-group-item list-group-item-dark list-group-item-action" id="new-table-link" href="#" data-bs-toggle="modal" data-bs-target="#addTableModal">Add new table</a>
+            <a class="list-group-item list-group-item-dark list-group-item-action" id="new-table-link" href="#"
+                data-bs-toggle="modal" data-bs-target="#addTableModal">Add new table</a>
         </div>
         <div class="mt-auto">
             <hr>
