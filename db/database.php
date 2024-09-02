@@ -134,6 +134,31 @@ class DatabaseHelper
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
+    public function getReservationsOnDay(string $date = null)
+    {
+        // If no date is provided, use today's date in 'Y-m-d' format
+        if ($date === null) {
+            $date = date('Y-m-d');
+        }
+
+        $query = "
+            SELECT r.*,
+            t.name as tableName
+            FROM RESERVATIONS r
+            LEFT JOIN TABLES t ON r.tableId = t.tableId
+            WHERE r.dateAndTime LIKE ?
+            ORDER BY r.dateAndTime;
+        ";
+        $stmt = $this->db->prepare($query);
+
+        $date .= "%"; // Create pattern
+        $stmt->bind_param("s", $date);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
     public function getCustomerOrders(bool $inPreparation, bool $delivered)
     {
         $query = "SELECT 
@@ -527,6 +552,30 @@ class DatabaseHelper
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
+    public function getServicesInfo($startDate, $endDate)
+    {
+        $query = "
+            SELECT 
+                DATE(creationTimestamp) as serviceDate, 
+                SUM(seats) as peopleServed,
+                COUNT(*) as tablesServed
+            FROM 
+                TABLES
+            WHERE 
+                DATE(creationTimestamp) >= ?
+                AND DATE(creationTimestamp) <= ?
+            GROUP BY 
+                serviceDate
+            ORDER BY 
+                serviceDate ASC;
+        ";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("ss", $startDate, $endDate);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
     public function addNewEmployee(
         $email,
         $password,
@@ -708,7 +757,12 @@ class DatabaseHelper
 
     public function getStockOrders()
     {
-        $query = "SELECT *, em.name as storekeeperName, em.surname as storekeeperSurname FROM STOCK_ORDERS st LEFT JOIN EMPLOYEES em ON st.storekeeperId = em.employeeId";
+        $query = "
+            SELECT *, 
+            em.name as storekeeperName, 
+            em.surname as storekeeperSurname 
+            FROM STOCK_ORDERS st LEFT JOIN EMPLOYEES em 
+                ON st.storekeeperId = em.employeeId";
         return $this->db->query($query)->fetch_all(MYSQLI_ASSOC);
     }
 

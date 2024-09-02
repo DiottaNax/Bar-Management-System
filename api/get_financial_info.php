@@ -14,19 +14,20 @@ if (!isset($_GET['startDate'], $_GET['endDate'], $_GET['type'])) {
     exit;
 }
 
-if ($_GET['type'] != 'sales' && $_GET['type'] != 'costs') {
-    http_response_code(400);
-    echo json_encode(['error' => 'Unable to provide info of this type!']);
-    exit;
-}
-
 $startDate = $_GET['startDate'];
 $endDate = $_GET['endDate'];
 $type = $_GET['type'];
 
 if($type == 'sales')
     $data = $dbh->getSalesInfo($startDate, $endDate);
-else
+else if ($type == 'costs')
     $data = $dbh->getStockCostsInfo($startDate, $endDate);
+else if ($type == 'services')
+    $data = $dbh->getServicesInfo($startDate, $endDate);
+else {
+    http_response_code(400);
+    echo json_encode(['error' => 'Unable to provide info of this type!']);
+    exit;
+}
 
 echo json_encode($data);

@@ -11,13 +11,17 @@
             <input type="date" id="end-date" class="form-control">
         </div>
         <div class="col-md-3 d-flex align-items-end">
-            <button id="update-chart" class="btn btn-primary">Update Chart</button>
+            <button id="update-charts" class="btn btn-primary">Update Chart</button>
         </div>
     </div>
 
+    
     <div class="row">
-        <div class="col-12">
+        <div class="col my-5">
             <canvas id="salesChart"></canvas>
+        </div>
+        <div class="col my-5">
+            <canvas id="servicesChart"></canvas>
         </div>
     </div>
 </main>

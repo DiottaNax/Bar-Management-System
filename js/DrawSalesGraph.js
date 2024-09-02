@@ -1,9 +1,14 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const chart = document.getElementById("salesChart").getContext("2d");
-  let salesCostsChart;
+  const salesCostsChart = document
+    .getElementById("salesChart")
+    .getContext("2d");
+  const servicesChart = document
+    .getElementById("servicesChart")
+    .getContext("2d");
+  let salesCostsChartInstance, servicesChartInstance;
 
-  function initChart(labels, salesData, costsData) {
-    salesCostsChart = new Chart(chart, {
+  function initSalesAndCostsChart(labels, salesData, costsData) {
+    salesCostsChartInstance = new Chart(salesCostsChart, {
       type: "line",
       data: {
         labels: labels,
@@ -52,25 +57,77 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function updateChart() {
+  function initServicesChart(labels, peopleServed, tablesServed) {
+    servicesChartInstance = new Chart(servicesChart, {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: "People Served",
+            data: peopleServed,
+            backgroundColor: "rgba(75, 192, 192, 0.2)",
+            borderColor: "rgba(75, 192, 192, 1)",
+            borderWidth: 1,
+          },
+          {
+            label: "Tables Served",
+            data: tablesServed,
+            backgroundColor: "rgba(255, 99, 132, 0.2)",
+            borderColor: "rgba(255, 99, 132, 1)",
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: "Number of People/Tables",
+            },
+          },
+          x: {
+            title: {
+              display: true,
+              text: "Date",
+            },
+          },
+        },
+        plugins: {
+          title: {
+            display: true,
+            text: "Daily Services",
+          },
+        },
+      },
+    });
+  }
+
+  function updateSalesAndCostsChart() {
     const startDate = document.getElementById("start-date").value;
     const endDate = document.getElementById("end-date").value;
 
     if (!startDate || !endDate) {
-      alert("Please select both start and end dates.");
+      alert(
+        "Please select both start and end dates for the sales and costs chart."
+      );
       return;
     }
 
-    Promise.all([
-      axios.get(
+    axios
+      .get(
         `./api/get_financial_info.php?startDate=${startDate}&endDate=${endDate}&type=sales`
-      ),
-      axios.get(
-        `./api/get_financial_info.php?startDate=${startDate}&endDate=${endDate}&type=costs`
-      ),
-    ])
-      .then(([salesResponse, costsResponse]) => {
-        return [salesResponse.data, costsResponse.data];
+      )
+      .then((salesResponse) => {
+        return axios
+          .get(
+            `./api/get_financial_info.php?startDate=${startDate}&endDate=${endDate}&type=costs`
+          )
+          .then((costsResponse) => {
+            return [salesResponse.data, costsResponse.data];
+          });
       })
       .then(([salesData, costsData]) => {
         const allDates = new Set(
@@ -105,21 +162,62 @@ document.addEventListener("DOMContentLoaded", () => {
           costsChartData.push(cumulativeCosts);
         });
 
-        if (salesCostsChart) {
-          salesCostsChart.destroy();
+        if (salesCostsChartInstance) {
+          salesCostsChartInstance.destroy();
         }
-        initChart(labels, salesChartData, costsChartData);
+        initSalesAndCostsChart(labels, salesChartData, costsChartData);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
-        alert("An error occurred while fetching data. Please try again.");
+        alert(
+          "An error occurred while fetching data for the sales and costs chart. Please try again."
+        );
       });
   }
 
-  document
-    .getElementById("update-chart")
-    .addEventListener("click", updateChart);
+  function updateServicesChart() {
+    const startDate = document.getElementById("start-date").value;
+    const endDate = document.getElementById("end-date").value;
 
-  // Initialize chart with empty data
-  initChart([], [], []);
+    if (!startDate || !endDate) {
+      alert("Please select both start and end dates for the services chart.");
+      return;
+    }
+
+    axios
+      .get(
+        `./api/get_financial_info.php?startDate=${startDate}&endDate=${endDate}&type=services`
+      )
+      .then((response) => {
+        const labels = [];
+        const peopleServed = [];
+        const tablesServed = [];
+
+        response.data.forEach((entry) => {
+          labels.push(entry.serviceDate);
+          peopleServed.push(entry.peopleServed);
+          tablesServed.push(entry.tablesServed);
+        });
+
+        if (servicesChartInstance) {
+          servicesChartInstance.destroy();
+        }
+        initServicesChart(labels, peopleServed, tablesServed);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        alert(
+          "An error occurred while fetching data for the services chart. Please try again."
+        );
+      });
+  }
+
+  document.getElementById("update-charts").addEventListener("click", () => {
+    updateSalesAndCostsChart();
+    updateServicesChart();
+  });
+
+  // Initialize charts with empty data
+  initSalesAndCostsChart([], [], []);
+  initServicesChart([], [], []);
 });
