@@ -329,24 +329,46 @@ class DatabaseHelper
 
     public function searchMenuProduct($prodName)
     {
-        // Prepara i pattern di ricerca
         $startsWithPattern = $prodName . "%";
         $containsPattern = "%" . $prodName . "%";
 
-        // Crea la query combinata con UNION
         $query = "
-        (SELECT * FROM MENU_PRODUCTS WHERE name LIKE ?)
-        UNION
-        (SELECT * FROM MENU_PRODUCTS WHERE name LIKE ?)
-        UNION
-        (SELECT * FROM MENU_PRODUCTS WHERE category LIKE ?)
-        UNION
-        (SELECT * FROM MENU_PRODUCTS WHERE subcategory LIKE ?)
-    ";
+            (SELECT * FROM MENU_PRODUCTS WHERE name LIKE ?)
+            UNION
+            (SELECT * FROM MENU_PRODUCTS WHERE name LIKE ?)
+            UNION
+            (SELECT * FROM MENU_PRODUCTS WHERE category LIKE ?)
+            UNION
+            (SELECT * FROM MENU_PRODUCTS WHERE subcategory LIKE ?)
+        ";
 
         $stmt = $this->db->prepare($query);
 
-        // Binding dei parametri per ciascuna parte della query
+        $stmt->bind_param("ssss", $startsWithPattern, $containsPattern, $containsPattern, $containsPattern);
+
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function searchStockedProduct($prodName)
+    {
+        $startsWithPattern = $prodName . "%";
+        $containsPattern = "%" . $prodName . "%";
+
+        $query = "
+            (SELECT * FROM STOCKED_UP_PRODUCTS WHERE name LIKE ?)
+            UNION
+            (SELECT * FROM STOCKED_UP_PRODUCTS WHERE name LIKE ?)
+            UNION
+            (SELECT * FROM STOCKED_UP_PRODUCTS WHERE category LIKE ?)
+            UNION
+            (SELECT * FROM STOCKED_UP_PRODUCTS WHERE subcategory LIKE ?)
+        ";
+
+        $stmt = $this->db->prepare($query);
+
         $stmt->bind_param("ssss", $startsWithPattern, $containsPattern, $containsPattern, $containsPattern);
 
         $stmt->execute();
@@ -465,7 +487,7 @@ class DatabaseHelper
         SELECT 
             DATE(dateAndTime) as receiptDate, 
             SUM(total) as totalSum,
-            COUNT(*) as totalPayment
+            COUNT(*) as totalPayments
         FROM 
             RECEIPTS
         WHERE 
@@ -475,6 +497,29 @@ class DatabaseHelper
             DATE(dateAndTime)
         ORDER BY 
             receiptDate ASC;";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("ss", $startDate, $endDate);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function getStockCostsInfo($startDate, $endDate)
+    {
+        $query = "
+        SELECT 
+            DATE(creationTimestamp) as orderDate, 
+            SUM(estimatedCost) as totalSum,
+            COUNT(*) as totalPayments
+        FROM 
+            STOCK_ORDERS
+        WHERE 
+            DATE(creationTimestamp) >= ?
+            AND DATE(creationTimestamp) <= ?
+        GROUP BY 
+            DATE(creationTimestamp)
+        ORDER BY 
+            orderDate ASC;";
 
         $stmt = $this->db->prepare($query);
         $stmt->bind_param("ss", $startDate, $endDate);
@@ -540,7 +585,7 @@ class DatabaseHelper
 
     public function updateEmployee(int $employeeId, array $updateInfo)
     {
-        $updateInfo = array_filter($updateInfo, fn($e) => isset($e) && $e != '');
+        $updateInfo = array_filter($updateInfo, fn($e) => isset ($e) && $e != '');
         $query = "UPDATE EMPLOYEES SET " . implode(" = ?, ", array_keys($updateInfo)) . " = ? WHERE employeeId = ?;";
         $stmt = $this->db->prepare($query);
         $values = array_values($updateInfo);
@@ -549,14 +594,16 @@ class DatabaseHelper
         return $stmt->execute();
     }
 
-    public function getEmployees() {
+    public function getEmployees()
+    {
         $query = "SELECT * FROM EMPLOYEES";
         $stmt = $this->db->prepare($query);
         $stmt->execute();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
-    public function addNewMenuProduct($name, $category, $subcategory, $description, $price, $imgFile = null) {
+    public function addNewMenuProduct($name, $category, $subcategory, $description, $price, $imgFile = null)
+    {
         $query = "
             INSERT INTO MENU_PRODUCTS
                 (name, category, subcategory, description, price";
@@ -566,7 +613,7 @@ class DatabaseHelper
         $paramTypes = "ssssd"; // Types to add as argument in the prepared stmt
         $paramTypes .= !empty($imgFile) ? "s" : ""; // Add type of imgFile if not empty
         $params = array_filter([$name, $category, $subcategory, $description, $price, $imgFile], fn($e) => !is_null($e)); // If img is null array filter removes it
-        
+
         $stmt = $this->db->prepare($query);
         $stmt->bind_param($paramTypes, ...$params);
         return $stmt->execute();
@@ -579,17 +626,18 @@ class DatabaseHelper
                 (name, category, subcategory, availability";
         $query .= !empty($imgFile) ? ", imgFile" : ""; // Add param imgFile if not empty
         $query .= ") VALUES (?, ?, ?, ?"; // Next part of the query
-        $query .= !empty($imgFile)  ? ", ?);" : ");"; // Add param imgFile if not empty
+        $query .= !empty($imgFile) ? ", ?);" : ");"; // Add param imgFile if not empty
         $paramTypes = "sssi"; // Types to add as argument in the prepared stmt
         $paramTypes .= !empty($imgFile) ? "s" : ""; // Add type of imgFile if not empty
-        $params = array_filter([$name, $category, $subcategory, $availability, $imgFile], fn ($e) => !is_null($e)); // If img is null array filter removes it
+        $params = array_filter([$name, $category, $subcategory, $availability, $imgFile], fn($e) => !is_null($e)); // If img is null array filter removes it
 
         $stmt = $this->db->prepare($query);
         $stmt->bind_param($paramTypes, ...$params);
         return $stmt->execute();
     }
 
-    private function updateProduct($query, $prodId, array $updateInfo) {
+    private function updateProduct($query, $prodId, array $updateInfo)
+    {
         $stmt = $this->db->prepare($query);
         $values = array_values($updateInfo);
         array_push($values, $prodId);
@@ -611,20 +659,57 @@ class DatabaseHelper
         return $this->updateProduct($query, $stockedProdId, $updateInfo);
     }
 
-    public function deleteProduct($query, $prodId) {
+    public function deleteProduct($query, $prodId)
+    {
         $stmt = $this->db->prepare($query);
         $stmt->bind_param("i", $prodId);
         return $stmt->execute();
     }
 
-    public function deleteMenuProduct($menuProdId) {
+    public function deleteMenuProduct($menuProdId)
+    {
         $query = "DELETE FROM MENU_PRODUCTS WHERE prodId = ?";
         return $this->deleteProduct($query, $menuProdId);
     }
 
-    public function deleteStockedProduct($stockedProdId) {
+    public function deleteStockedProduct($stockedProdId)
+    {
         $query = "DELETE FROM STOCKED_UP_PRODUCTS WHERE prodId = ?";
         return $this->deleteProduct($query, $stockedProdId);
     }
-    
+
+    public function getSuppliersForProd(int $prodId)
+    {
+        $query = "SELECT companyName, cost FROM supply_costs WHERE prodId = ? ORDER BY cost;";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $prodId);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function createNewStockOrder(int $storekeeperId, $estimatedCost)
+    {
+        $query = "INSERT INTO STOCK_ORDERS (storekeeperId, estimatedCost) VALUES (?, ?)";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("id", $storekeeperId, $estimatedCost);
+        $result = $stmt->execute();
+        return $result ? $this->db->insert_id : false;
+    }
+
+    public function addItemToStockOrder($prodId, $orderId, $supplierName, $quantity)
+    {
+        $query = "INSERT INTO SUPPLY_ITEMS(prodId, orderId, supplierName, quantity) VALUES (?, ?, ?, ?)";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("iisi", $prodId, $orderId, $supplierName, $quantity);
+        $stmt->execute();
+
+        return $this->db->insert_id;
+    }
+
+    public function getStockOrders()
+    {
+        $query = "SELECT *, em.name as storekeeperName, em.surname as storekeeperSurname FROM STOCK_ORDERS st LEFT JOIN EMPLOYEES em ON st.storekeeperId = em.employeeId";
+        return $this->db->query($query)->fetch_all(MYSQLI_ASSOC);
+    }
+
 }

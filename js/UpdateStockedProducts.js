@@ -40,9 +40,15 @@ document.addEventListener("DOMContentLoaded", () => {
     .addEventListener("click", function () {
       const formData = new FormData(document.getElementById("editProductForm"));
       const fileInput = document.getElementById("editProductImage");
-      const file = fileInput.files[0].name;
-
-      if (file) formData.set("imgFile", file);
+      
+      if (fileInput.files[0]) {
+        const file = fileInput.files[0].name;
+        if (file) {
+          formData.set("imgFile", file);
+        }
+      } else {
+        formData.delete("imgFile");
+      }
 
       const productData = Object.fromEntries(formData.entries());
       const productId = this.getAttribute("data-product-id");

@@ -113,11 +113,12 @@ create table if not exists RESERVATIONS (
      constraint ID_RESERVATIONS_ID primary key (cellNumber, dateAndTime));
 
 create table if not exists STOCK_ORDERS (
+     orderId int auto_increment,
      creationTimestamp datetime default current_timestamp,
      sent boolean not null,
      estimatedCost float(1) not null,
      storekeeperId int,
-     constraint ID_STOCK_ORDERS_ID primary key (creationTimestamp));
+     constraint ID_STOCK_ORDERS_ID primary key (orderId));
 
 create table if not exists STOCKED_UP_PRODUCTS (
      prodId int auto_increment,
@@ -141,10 +142,10 @@ create table if not exists SUPPLY_COSTS (
 
 create table if not exists SUPPLY_ITEMS (
      prodId int,
-     orderDate datetime not null,
+     orderId int not null,
      supplierName varchar(128) not null,
-     quantity numeric(1) not null,
-     constraint ID_SUPPLY_ITEMS_ID primary key (prodId, orderDate, supplierName));
+     quantity int not null,
+     constraint ID_SUPPLY_ITEMS_ID primary key (prodId, orderId, supplierName));
 
 create table if not exists TABLES (
      tableId int auto_increment,
@@ -253,8 +254,8 @@ alter table SUPPLY_ITEMS add constraint REF_SUPPL_SUPPL_FK
      references SUPPLIERS(companyName);
 
 alter table SUPPLY_ITEMS add constraint REF_SUPPL_STOCK_1_FK
-     foreign key (orderDate)
-     references STOCK_ORDERS(creationTimestamp)
+     foreign key (orderId)
+     references STOCK_ORDERS(orderId)
      on delete cascade;
 
 alter table SUPPLY_ITEMS add constraint REF_SUPPL_STOCK
@@ -329,7 +330,7 @@ create index REF_RESER_TABLE_IND
      on RESERVATIONS (tableId);
 
 create unique index ID_STOCK_ORDERS_IND
-     on STOCK_ORDERS (creationTimestamp);
+     on STOCK_ORDERS (orderId);
 
 create index REF_STOCK_STORE_IND
      on STOCK_ORDERS (storekeeperId);
@@ -347,13 +348,13 @@ create index REF_SUPPL_STOCK_2_IND
      on SUPPLY_COSTS (prodId);
 
 create unique index ID_SUPPLY_ITEMS_IND
-     on SUPPLY_ITEMS (prodId, orderDate, supplierName);
+     on SUPPLY_ITEMS (prodId, orderId, supplierName);
 
 create index REF_SUPPL_SUPPL_IND
      on SUPPLY_ITEMS (supplierName);
 
 create index REF_SUPPL_STOCK_1_IND
-     on SUPPLY_ITEMS (orderDate);
+     on SUPPLY_ITEMS (orderId);
 
 create unique index ID_TABLES_IND
      on TABLES (tableId);
