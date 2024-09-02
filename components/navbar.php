@@ -14,6 +14,9 @@
                 <li class="nav-item" opt="tables">
                     <a class="nav-link" href="./home.php?opt=tables">Tables</a>
                 </li>
+                <li class="nav-item" opt="reservations">
+                    <a class="nav-link" href="./home.php?opt=reservations">Reservations</a>
+                </li>
                 <li class="nav-item" opt="customer-orders">
                     <a class="nav-link" href="./home.php?opt=customer-orders">Customer Orders</a>
                 </li>
