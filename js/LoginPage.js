@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", (event) => {
   event.preventDefault();
-  console.log("js correctly attached");
   const mainLogoContainer = document.querySelector(".logo-container");
   const formContainer = document.getElementById("form-container");
   const cardLogo = document.querySelector(".card-logo img");
@@ -24,16 +23,18 @@ document.addEventListener("DOMContentLoaded", (event) => {
     event.preventDefault();
     const loginRequest = new FormData(loginForm);
 
+    // Try to login the user
     axios.post("./api/process_login.php", loginRequest).then((response) => {
-        console.log(response.data.message);
-        console.log(response.data["success"]);
-      loginResult.innerText = response.data["message"];
-
+      console.log(response.data.message);
+      console.log(response.data["success"]);
+      // If the login is successful, redirect to the home page
       if (response.data["success"]) {
+        loginResult.style.color = 'green';
         setTimeout(() => (window.location.href = "index.php"), 500);
       } else {
-          loginResult.style.color = red;
+        loginResult.style.color = 'red';
       }
+      loginResult.innerText = response.data["message"];
     });
   });
 });

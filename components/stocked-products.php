@@ -1,4 +1,8 @@
 <?php
+if (!isset($_SESSION['employeeId'])) {
+    die("Errore: Accesso non autorizzato. Effettua il login.");
+}
+
 $products = $dbh->getAllStockedProducts();
 ?>
 
@@ -17,7 +21,7 @@ $products = $dbh->getAllStockedProducts();
 </div>
 
 
-<div class="container px-2">
+<div class="container px-2 mb-5">
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 justify-content-center">
         <?php foreach ($products as $product): ?>
             <div class="col">

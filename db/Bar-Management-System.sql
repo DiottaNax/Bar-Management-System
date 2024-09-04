@@ -26,10 +26,10 @@ create table if not exists ADDITIONAL_REQUESTS (
 
 create table if not exists CUSTOMER_ORDERS (
      tableId int,
-     orderNum int, -- it could auto_increment, but it is design to increment along with table (i.e. it could exist order n.1 for two or more diffent tables)
+     orderNum int, -- it could auto_increment, but it is designed to increment along with table (i.e. it is ammissible order n.1 for two or more diffent tables)
      timestamp datetime default current_timestamp,
-     inPreparation boolean not null,
-     delivered boolean not null,
+     inPreparation boolean not null default 0,
+     delivered boolean not null default 0,
      waiterId int,
      constraint ID_CUSTOMER_ORDERS_ID primary key (tableId, orderNum));
 
@@ -37,7 +37,7 @@ create table if not existS EMPLOYEES (
      employeeId int auto_increment,
      email varchar(312) not null,
      password varchar(512) not null,
-     cf varchar(17) not null,
+     cf char(17) not null,
      name varchar(128) not null,
      surname varchar(128) not null,
      city varchar(256),
@@ -46,10 +46,10 @@ create table if not existS EMPLOYEES (
      streetNumber char(6),
      birthday date,
      hiringDate date,
-     isWaiter boolean default 0,
-     isStorekeeper boolean default 0,
-     isKitchenStaff boolean default 0,
-     isAdmin boolean default 0,
+     isWaiter boolean not null default 0,
+     isStorekeeper boolean not null default 0,
+     isKitchenStaff boolean not null default 0,
+     isAdmin boolean not null default 0,
      constraint ID_EMPLOYEES_ID primary key (employeeId));
 
 create table if not exists INGREDIENTS (
@@ -73,7 +73,7 @@ create table if not exists ORDINATIONS (
      menuProdId int,
      tableId int,
      orderedProdId int,
-     quantity numeric(1) not null,
+     quantity int not null,
      constraint ID_ORDINATIONS_ID primary key (orderNum, menuProdId, tableId, orderedProdId));
 
 create table if not exists PAID_PRODUCTS (
@@ -81,17 +81,17 @@ create table if not exists PAID_PRODUCTS (
      menuProdId int,
      tableId int,
      receiptId int,
-     quantity numeric(1) not null,
+     quantity int not null,
      constraint ID_PAID_PRODUCTS_ID primary key (orderedProdId, menuProdId, tableId, receiptId));
 
 create table if not exists PRODUCTS_IN_TABLE (
      orderedProdId int auto_increment,
      menuProdId int,
      tableId int,
-     quantity numeric(1) not null,
+     quantity int not null,
      finalPrice float(1) not null,
-     hasVariation boolean not null,
-     numPaid numeric(1) not null,
+     hasVariation boolean not null default 0,
+     numPaid int not null default 0,
      constraint ID_PRODUCTS_IN_TABLE_ID primary key (orderedProdId, menuProdId, tableId));
 
 create table if not exists RECEIPTS (
@@ -108,14 +108,14 @@ create table if not exists RESERVATIONS (
      cellNumber varchar(15) not null,
      dateAndTime datetime not null,
      clientName varchar(128) not null,
-     seats numeric(1) not null,
+     seats int not null,
      tableId int default null,
      constraint ID_RESERVATIONS_ID primary key (cellNumber, dateAndTime));
 
 create table if not exists STOCK_ORDERS (
      orderId int auto_increment,
      creationTimestamp datetime default current_timestamp,
-     sent boolean not null,
+     sent boolean not null default 0,
      estimatedCost float(1) not null,
      storekeeperId int,
      constraint ID_STOCK_ORDERS_ID primary key (orderId));
@@ -126,7 +126,7 @@ create table if not exists STOCKED_UP_PRODUCTS (
      imgFile varchar(256) not null,
      category varchar(100) not null,
      subcategory varchar(100) not null,
-     availability numeric(1) not null,
+     availability int not null,
      constraint ID_STOCKED_UP_PRODUCTS_ID primary key (prodId));
 
 create table if not exists SUPPLIERS (
@@ -151,7 +151,7 @@ create table if not exists TABLES (
      tableId int auto_increment,
      creationTimestamp datetime not null,
      name varchar(128) not null,
-     seats numeric(1) not null,
+     seats int not null,
      constraint ID_TABLES_ID primary key (tableId));
 
 create table if not exists VARIATIONS (

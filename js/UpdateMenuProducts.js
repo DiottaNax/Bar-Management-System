@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const productData = Object.fromEntries(formData.entries());
       console.log("Sending: " + JSON.stringify(productData));
 
+      // Try to add a new product to the database when the user clicks the submit button
       fetch("./api/update_menu_products.php", {
         method: "POST",
         headers: {
@@ -36,22 +37,22 @@ document.addEventListener("DOMContentLoaded", () => {
       const formData = new FormData(document.getElementById("editProductForm"));
       const fileInput = document.getElementById("editProductImage");
       
+      // If the user has selected a new image, set the file name to the form data
       if (fileInput.files[0]) {
         const file = fileInput.files[0].name;
         if (file) {
-          formData.set("imgFile", file);
+          formData.set("imgFile", file); // The file is supposed to exist in the "resources/img" folder
         }
       } else {
+        // If the user has not selected a new image, delete the imgFile entry
         formData.delete("imgFile");
       }
 
       const productData = Object.fromEntries(formData.entries());
       const productId = this.getAttribute("data-product-id");
 
-      console.log(
-        "Sending: " + JSON.stringify({ prodId: productId, ...productData })
-      );
-
+      // Try to update the product info in the database when the user clicks the submit button
+      // Only the fields that are filled are sent to the database
       fetch("./api/update_menu_products.php", {
         method: "PUT",
         headers: {
@@ -76,6 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (confirm("Are you sure you want to delete this product?")) {
         const productId = this.getAttribute("data-product-id");
 
+        // Try to delete the product from the database when the user clicks the delete button
         fetch("./api/update_menu_products.php?prodId=" + productId, {
           method: "DELETE",
         })

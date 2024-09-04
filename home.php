@@ -1,13 +1,17 @@
 <?php
 include_once "./db-config.php";
 
+if (!isset($_SESSION['employeeId'])) {
+    die("Errore: Accesso non autorizzato. Effettua il login.");
+}
+
 if (!isset($_GET['opt']))
     $_GET['opt'] = "tables";
 
 ?>
 
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -23,10 +27,7 @@ if (!isset($_GET['opt']))
     <?php
     include_once "./components/navbar.php";
     include_once "./components/{$_GET['opt']}.php";
-    //include_once "./components/products.php"
     ?>
 </body>
-
-<script src="./js/Navbar.js"></script> <!-- Include to make the navbar work properly -->
 
 </html>

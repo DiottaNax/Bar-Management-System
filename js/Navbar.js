@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const matchingElements = nav.querySelectorAll(
       `[opt="${optChoice}"] .nav-link`
     );
+    // Set the active class to the matching element
     matchingElements.forEach((element) => {
       element.classList.add("active");
     });

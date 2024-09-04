@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
+
+  // Function to render the order table
   function updateOrderTable() {
     let html = "";
     orderItems.forEach((item, index) => {
@@ -36,19 +38,24 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log(orderItems);
   }
 
-  // Add Product
+  // Show add product modal on button click
   $("#addProductBtn").click(function () {
+    $("#productResults").empty();
+    $("#productSearch").val("");
     $("#addProductModal").modal("show");
   });
 
+  // Display search results in the modal
   $("#productSearch").on("input", function () {
     const search = $(this).val();
     if (search.length > 2) {
+      // HTTP request to the appropriate API
       $.get("./api/search_menu_product.php", { q: search }, function (data) {
         let html = "";
         console.log(data);
+        // For each product result in the data, create a new row in the table
         data.forEach((product) => {
-          html += `<div class="product-item">
+          html += `<div class="product-item mt-2">
                             ${product.name} - $${product.price}
                             <button class="btn btn-sm btn-primary add-to-order" data-id="${product.prodId}" data-name="${product.name}" data-price="${product.price}">Add</button>
                         </div>`;
@@ -58,8 +65,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  // Add product to order
   $(document).on("click", ".add-to-order", function () {
     console.log("ProdId: " + parseInt($(this).data("id")));
+    // Create a new product object with the data from the button
     const product = {
       prodId: parseInt($(this).data("id")),
       name: $(this).data("name"),
@@ -68,24 +77,29 @@ document.addEventListener("DOMContentLoaded", function () {
       quantity: 1,
       variations: [],
     };
+    // Add the product to the order items array
     orderItems.push(product);
+    // Update the order table and render it
     updateOrderTable();
     $("#addProductModal").modal("hide");
   });
 
   // Add Variation
   $(document).on("click", ".add-variation", function () {
-    const index = $(this).data("index");
+    const index = $(this).data("index"); // Get the index of the product in the order items array
     $("#addVariationModal").data("item-index", index).modal("show");
   });
 
+  // Display variation search results in the modal
   $("#variationSearch").on("input", function () {
     const search = $(this).val();
     if (search.length > 2) {
+      // HTTP request to the appropriate API
       $.get("./api/search_variation.php", { q: search }, function (data) {
         let html = "";
+        // For each variation result in the data, create a new row in the table to display the variation
         data.forEach((variation) => {
-          html += `<div class="variation-item">
+          html += `<div class="variation-item mt-2">
                     ${variation.additionalRequest}: +$${
             variation.additionalPrice ?? "0.00"
           }
@@ -102,8 +116,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  // Add variation to product
   $(document).on("click", ".add-variation-to-product", function () {
-    const index = $("#addVariationModal").data("item-index");
+    const index = $("#addVariationModal").data("item-index"); // Get the index of the product in the order items array
     const variation = {
       variationId: $(this).data("id"),
       name: $(this).data("name"),
@@ -147,6 +162,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     console.log("Trying to send order: " + orderData);
 
+    // Send order details to the appropriate API
     $.ajax({
       url: "./api/new_customer_order.php",
       method: "POST",
@@ -165,7 +181,7 @@ document.addEventListener("DOMContentLoaded", function () {
         } else if (response.error) {
           alert("Failed to send order: " + response.error);
         } else {
-          // Gestisci la risposta inattesa
+          // Log unexpected response
           console.log("Unexpected response:", response);
           alert(
             "An unexpected response was received: " +

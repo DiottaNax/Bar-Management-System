@@ -1,17 +1,13 @@
 document.addEventListener("DOMContentLoaded", function () {
-  /**
-   * Block of code to make date selectpr work
-   */
+  
   const dateSelector = document.getElementById("date-selector");
   const tableContainer = document.getElementById("table-container");
 
   dateSelector.addEventListener("change", function () {
+    // Redirection to the page with the selected date
     window.location.href = "?date=" + this.value;
   });
 
-  /**
-   * Block of code to make add new table link work
-   */
   const offcanvas = new bootstrap.Offcanvas(
     document.getElementById("top-menu")
   );
@@ -26,14 +22,12 @@ document.addEventListener("DOMContentLoaded", function () {
     event.preventDefault();
     const formData = new FormData(addTableForm);
 
+    // Try to add a new table to the database when the user clicks the submit button
     fetch("api/add_table.php", {
       method: "POST",
       body: formData,
     })
-      .then((response) => {
-        console.log(response.body.getReader.toString());
-        return response.json();
-      })
+      .then((response) => response.json())
       .then((data) => {
         if (data.success) {
           location.reload(); // Reload the page to show the new table

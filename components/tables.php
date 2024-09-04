@@ -1,16 +1,24 @@
+<?php
+if (!isset($_SESSION['employeeId'])) {
+    die("Errore: Accesso non autorizzato. Effettua il login.");
+}
+?>
+
+<!-- Page to view tables -->
 <main class="container mt-5">
     <h1 class="mb-4">Table Management</h1>
 
     <?php
-    // Determina la data da utilizzare
-    $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
+    // Get date if passed as GET, or else get current date
+    $date = $_GET['date'] ?? date('Y-m-d');
 
-    // Valida la data
+    // Control that the date format is correct
     $dateObj = DateTime::createFromFormat('Y-m-d', $date);
     if (!$dateObj || $dateObj->format('Y-m-d') !== $date) {
-        $date = date('Y-m-d'); // Se la data non è valida, usa la data odierna
+        $date = date('Y-m-d'); // If not, use the current date
     }
     ?>
+
 
     <div class="row mb-4">
         <div class="col-md-6">
@@ -19,25 +27,31 @@
         </div>
     </div>
 
+    <!-- Display tables -->
     <div id="table-container" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         <?php
-        $tables = $dbh->getTables($date); // Passa la data selezionata
+        $tables = $dbh->getTables($date); // Get tables in the selected date
+
+        // Loop through the tables and display them in cards
         foreach ($tables as $table):
             ?>
             <div class="col">
                 <div class="card h-100">
+                    <!-- Card header with table name and number(based on the day, it does not correspond to the tableId) -->
                     <div class="card-header py-2 text-center">
                         <h5 class="card-title pt-2">#<?php echo $table['numOfDay'] ?> Table
                             <?php echo htmlspecialchars($table['name']); ?>
                         </h5>
                     </div>
                     <div class="card-body d-flex flex-column mt-2 mx-2 px-3">
+                        <!-- Card body with table seats and creation date -->
                         <p class="card-text"><strong>Seats:</strong> <?php echo htmlspecialchars($table['seats']); ?></p>
                         <p class="card-text"><strong>Created:</strong>
                             <?php echo date('F j, Y, g:i a', strtotime($table['creationTimestamp'])); ?>
                         </p>
                     </div>
                     <div class="card-footer mt-2 text-center">
+                        <!-- Card footer with links/buttons to add products and view unpaid products -->
                         <a target="_blank"
                             href="./compile-customer-order.php?tableId=<?php echo $table['tableId']; ?>&date=<?php echo $date; ?>"
                             class="btn btn-primary me-2" data-table-id="<?php echo $table['tableId']; ?>">Add
@@ -60,7 +74,7 @@
     </div>
     <div class="offcanvas-body d-flex flex-column">
         <div class="list-group">
-            <a class="list-group-item list-group-item-dark list-group-item-action" id="new-table-link" href="#"
+            <a class="list-group-item list-group-item-primary list-group-item-action" id="new-table-link" href="#"
                 data-bs-toggle="modal" data-bs-target="#addTableModal">Add new table</a>
         </div>
         <div class="mt-auto">

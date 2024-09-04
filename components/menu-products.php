@@ -1,13 +1,18 @@
 <?php
+if (!isset($_SESSION['employeeId'])) {
+    die("Errore: Accesso non autorizzato. Effettua il login.");
+}
 include_once "./components/recipe-toast.php";
 $products = $dbh->getAllMenuProducts();
 ?>
+
 
 <div class="container mt-5">
     <div class="row align-items-center mb-4">
         <div class="col-md-6">
             <h1>Menu Products</h1>
         </div>
+        <!-- Select category -->
         <div class="col-md-6 text-md-end">
             <label for="product-type" class="form-label me-2">View:</label>
             <select id="product-type" class="form-select d-inline-block w-auto"
@@ -19,15 +24,18 @@ $products = $dbh->getAllMenuProducts();
     </div>
 
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 justify-content-center mb-5">
+        <!-- Loop through products and display them in a card -->
         <?php foreach ($products as $product): ?>
             <div class="col">
                 <div class="card h-100 shadow-sm">
                     <div class="row g-0 h-100">
+                        <!-- Product image, get images from resources/img/ -->
                         <div class="col-md-4">
                             <img src="./resources/img/<?php echo $product['imgFile'] ?>"
                                 class="img-fluid rounded-start h-100" alt="<?php echo $product['name'] ?> image"
                                 style="object-fit: cover;">
                         </div>
+                        <!-- Product details -->
                         <div class="col-md-8 d-flex flex-column">
                             <div class="card-body d-flex flex-column h-100">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -45,12 +53,14 @@ $products = $dbh->getAllMenuProducts();
                                 </p>
 
                                 <div class="d-flex align-items-center mt-3">
+                                    <!-- Recipe button -->
                                     <a href="#" type="toast-trigger" class="btn btn-primary"
                                         prod-id="<?php echo $product['prodId'] ?>"
                                         prod-name="<?php echo $product['name'] ?>">
                                         <img class="mb-1 pe-1" src="./resources/svg/document.svg" alt="Recipe icon">Recipe
                                     </a>
                                     <div class="dropdown ms-1 dropend">
+                                        <!-- Edit button -->
                                         <button class="btn btn-warning dropdown-toggle mx-2" type="button"
                                             id="dropdownMenuButton-<?php echo $product['prodId']; ?>"
                                             data-bs-toggle="dropdown" aria-expanded="false">
@@ -58,6 +68,7 @@ $products = $dbh->getAllMenuProducts();
                                         </button>
                                         <ul class="dropdown-menu"
                                             aria-labelledby="dropdownMenuButton-<?php echo $product['prodId']; ?>">
+                                            <!-- Edit product -->
                                             <li>
                                                 <a class="dropdown-item edit-product" href="#"
                                                     data-product-id="<?php echo $product['prodId']; ?>"
@@ -68,6 +79,7 @@ $products = $dbh->getAllMenuProducts();
                                                 </a>
                                             </li>
                                             <li>
+                                                <!-- Delete product -->
                                                 <a class="dropdown-item delete-product" href="#" style="color: red;"
                                                     data-product-id="<?php echo $product['prodId']; ?>">
                                                     <img class="mb-1 me-2" src="./resources/svg/delete-red.svg"
@@ -88,7 +100,7 @@ $products = $dbh->getAllMenuProducts();
 </div>
 
 
-<!-- Add Product Modal -->
+<!-- Add Product Modal, with appropriate form -->
 <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -134,7 +146,7 @@ $products = $dbh->getAllMenuProducts();
     </div>
 </div>
 
-<!-- Edit Product Modal -->
+<!-- Edit Product Modal with appropriate form -->
 <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -180,8 +192,10 @@ $products = $dbh->getAllMenuProducts();
     </div>
 </div>
 
+<!-- Script to update the menu products -->
 <script src="./js/UpdateMenuProducts.js"></script>
 
+<!-- Script to update the products visualization -->
 <script>
     document.getElementById('product-type').addEventListener('change', function () {
         window.location.href = this.value;

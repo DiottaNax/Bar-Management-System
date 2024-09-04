@@ -57,8 +57,8 @@ if (!$tableId || !$orderNum) {
                             <?php endif; ?>
                         </td>
                         <td>
-                            <button class="btn btn-sm btn-primary edit-item" data-id="<?php echo $item['orderedProdId']; ?>">Edit</button>
-                            <button class="btn btn-sm btn-danger delete-item" data-id="<?php echo $item['orderedProdId']; ?>">Delete</button>
+                            <button class="btn btn-sm btn-primary edit-item disabled" data-id="<?php echo $item['orderedProdId']; ?>">Edit</button>
+                            <button class="btn btn-sm btn-danger delete-item disabled" data-id="<?php echo $item['orderedProdId']; ?>">Delete</button>
                         </td>
                     </tr>
                 <?php endforeach; ?>

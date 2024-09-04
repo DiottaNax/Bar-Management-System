@@ -1,3 +1,5 @@
+<!-- Recipe toast, to include in menu-products page -->
+
 <div id="toast-container" class="position-fixed bottom-50 start-50 translate-middle" style="z-index: 9999;">
   <div id="recipe-toast" class="toast text-bg-dark" role="alert" aria-live="assertive" aria-atomic="true">
     <div class="toast-header">
@@ -11,4 +13,5 @@
   </div>
 </div>
 
+<!-- Include the proper js -->
 <script src="./js/RecipeLoader.js"></script>

@@ -3,6 +3,7 @@
 header("Content-Type: application/json");
 require_once '../db-config.php';
 
+// Controls that the required fields are correct
 function validateProductData($data)
 {
     $requiredFields = ['name', 'category', 'subcategory', 'availability'];
@@ -15,12 +16,15 @@ function validateProductData($data)
     return true;
 }
 
-$method = $_SERVER['REQUEST_METHOD'];
-
-switch ($method) {
+// Handles the HTTP requests based on the method type:
+// POST: Adds a new stocked product to the database
+// PUT: Updates an existing stocked product in the database
+// DELETE: Deletes a stocked product from the database   
+switch ($_SERVER['REQUEST_METHOD']) {
     case 'POST':
         $data = json_decode(file_get_contents("php://input"), true);
         if (validateProductData($data)) {
+            // Adds a new stocked product to the database if the data is correct
             $result = $dbh->addNewStockedProduct(
                 $data['name'],
                 $data['category'],
@@ -45,8 +49,9 @@ switch ($method) {
         $data = json_decode(file_get_contents("php://input"), true);
         if (isset($data['prodId'])) {
             $prodId = $data['prodId'];
-            unset($data['prodId']);
+            unset($data['prodId']); // Remove the prodId from the data array, it cannot be updated
 
+            // Updates an existing stocked product in the database if the data is correct
             $result = $dbh->updateStockedProduct($prodId, array_filter($data));
             if ($result) {
                 echo json_encode(['success' => 1, 'message' => "Stocked Product updated successfully"]);
@@ -61,7 +66,9 @@ switch ($method) {
         break;
 
     case 'DELETE':
-        $prodId = $_GET['prodId'] ?? null;
+        $prodId = $_GET['prodId'] ?? false;
+
+        // Deletes a stocked product from the database if the prodId is set
         if ($prodId) {
             $result = $dbh->deleteStockedProduct($prodId);
             if ($result) {

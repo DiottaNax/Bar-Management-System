@@ -5,6 +5,7 @@ require_once '../db-config.php';
 
 function validateEmployeeData($data)
 {
+    // Check if the required fields are set and not empty
     $requiredFields = ['email', 'password', 'cf', 'name', 'surname', 'birthday', 'hiringDate'];
     foreach ($requiredFields as $field) {
         if (!isset($data[$field]) || empty($data[$field])) {
@@ -14,13 +15,16 @@ function validateEmployeeData($data)
     return true;
 }
 
-$method = $_SERVER['REQUEST_METHOD'];
-
-switch ($method) {
+// Handle the request based on the HTTP method:
+// POST: Add a new employee
+// PUT: Update an existing employee
+// DELETE: Delete an employee
+switch ($_SERVER['REQUEST_METHOD']) {
     case 'POST':
-        // Aggiunta di un nuovo dipendente
+        // Get and validate the employee data from the request body
         $data = json_decode(file_get_contents("php://input"), true);
         if (validateEmployeeData($data)) {
+            // Add the new employee to the database
             $result = $dbh->addNewEmployee(
                 $data['email'],
                 $data['password'],
@@ -52,13 +56,13 @@ switch ($method) {
         break;
 
     case 'PUT':
-        // Aggiornamento di un dipendente esistente
+        // Update an existing employee
         $data = json_decode(file_get_contents("php://input"), true);
         if (isset($data['employeeId'])) {
             $employeeId = $data['employeeId'];
-            unset($data['employeeId']);
+            unset($data['employeeId']); // Remove the employeeId from the data array, it cannot be updated
 
-            $result = $dbh->updateEmployee($employeeId, $data);
+            $result = $dbh->updateEmployee($employeeId, $data); // Update the employee in the database and get the result
             if ($result) {
                 echo json_encode(['success' => 1, 'message' => "Employee updated successfully"]);
             } else {
@@ -72,10 +76,10 @@ switch ($method) {
         break;
 
     case 'DELETE':
-        // Eliminazione di un dipendente
-        $employeeId = $_GET['employeeId'] ?? null;
-        if ($employeeId) {
-            $result = $dbh->deleteEmployee($employeeId);
+        // Delete an employee
+        $employeeId = $_GET['employeeId'] ?? false;
+        if (isset($employeeId)) {
+            $result = $dbh->deleteEmployee($employeeId); // Delete the employee from the database and get the result or else return an error
             if ($result) {
                 echo json_encode(['success' => 1, 'message' => "Employee deleted successfully"]);
             } else {

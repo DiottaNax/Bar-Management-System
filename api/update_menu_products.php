@@ -3,6 +3,7 @@
 header("Content-Type: application/json");
 require_once '../db-config.php';
 
+// Controls that the required fields are set and not empty
 function validateProductData($data)
 {
     $requiredFields = ['name', 'category', 'subcategory', 'description', 'price'];
@@ -15,11 +16,14 @@ function validateProductData($data)
     return true;
 }
 
-$method = $_SERVER['REQUEST_METHOD'];
-
-switch ($method) {
+// Handles the HTTP requests based on the method type:
+// POST: Adds a new menu product to the database
+// PUT: Updates an existing menu product in the database
+// DELETE: Deletes a menu product from the database 
+switch ($_SERVER['REQUEST_METHOD']) {
     case 'POST':
         $data = json_decode(file_get_contents("php://input"), true);
+        // Controls that the required fields are correct
         if (validateProductData($data)) {
             $result = $dbh->addNewMenuProduct(
                 $data['name'],
@@ -44,10 +48,12 @@ switch ($method) {
 
     case 'PUT':
         $data = json_decode(file_get_contents("php://input"), true);
+        // Controls that the required fields are correct
         if (isset($data['prodId'])) {
             $prodId = $data['prodId'];
-            unset($data['prodId']);
+            unset($data['prodId']); // Removes the prodId from the data array, prodId cannot be updated
 
+            // Updates the menu product in the database
             $result = $dbh->updateMenuProduct($prodId, array_filter($data));
             if ($result) {
                 echo json_encode(['success' => 1, 'message' => "Menu Product updated successfully"]);
@@ -62,8 +68,9 @@ switch ($method) {
         break;
 
     case 'DELETE':
-        $prodId = $_GET['prodId'] ?? null;
+        $prodId = $_GET['prodId'] ?? false;
         if ($prodId) {
+            // Deletes the menu product from the database if the prodId is set
             $result = $dbh->deleteMenuProduct($prodId);
             if ($result) {
                 echo json_encode(['success' => 1, 'message' => "Menu Product deleted successfully"]);
@@ -78,6 +85,7 @@ switch ($method) {
         break;
 
     default:
+        // Returns an error if the method is not allowed
         http_response_code(405);
         echo json_encode(['success' => 0, 'message' => "Method not allowed"]);
         break;

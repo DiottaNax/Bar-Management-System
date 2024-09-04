@@ -17,6 +17,7 @@ $storekeeperId = $_SESSION['employeeId'];
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
+        // It is easier to set the storekeeperId as a global variable here, so that it can be accessed by the JavaScript file
         const storekeeperId = <?php echo json_encode(intval($storekeeperId)); ?>;
         let orderItems = [];
     </script>
@@ -29,6 +30,7 @@ $storekeeperId = $_SESSION['employeeId'];
 
         <div class="container mt-4">
             <table class="table table-striped table-hover" id="orderItemsTable">
+                <!-- Table header for the order items -->
                 <thead class="table-primary">
                     <tr>
                         <th>Product ID</th>

@@ -8,6 +8,7 @@ function addEmployee() {
     employeeData[role] = form.elements[role].checked ? 1 : 0;
   });
 
+  // Try to add a new employee to the database when the user clicks the submit button
   fetch("./api/update_employees.php", {
     method: "POST",
     headers: {
@@ -24,6 +25,7 @@ function addEmployee() {
     .catch((error) => console.error("Error:", error));
 }
 
+// Set the employee id to the modify employee form
 function setEmployeeId(employeeId) {
   $("#modifyEmployeeId").val(employeeId);
 }
@@ -38,8 +40,7 @@ function updateEmployee() {
     employeeData[role] = form.elements[role].checked ? 1 : 0;
   });
 
-  console.log("\n\n sending:     " + JSON.stringify(employeeData));
-
+  // Try to update the employee info in the database when the user clicks the submit button
   fetch("./api/update_employees.php", {
     method: "PUT",
     headers: {
@@ -56,6 +57,7 @@ function updateEmployee() {
     .catch((error) => console.error("Error:", error));
 }
 
+// Try to delete an employee from the database when the user clicks the delete button
 function deleteEmployee(employeeId) {
   if (confirm("Do you really want to delete this employee?")) {
     fetch("./api/update_employees.php?employeeId=" + employeeId, {

@@ -1,10 +1,20 @@
 <?php
 require_once './db-config.php';
+
+if (!isset($_SESSION['employeeId'])) {
+    die("You must be logged in to access this page.");
+}
+
 $tableId = $_GET['tableId'] ?? null;
 $waiterId = $_SESSION['employeeId'];
 
 if (!$tableId) {
     die("Order number and table ID are required.");
+} else {
+    $table = $dbh->getTable($tableId);
+    if (!$table) {
+        die("Table not found.");
+    }
 }
 ?>
 
@@ -29,13 +39,13 @@ if (!$tableId) {
 
 <body>
     <div class="container mt-5">
-        <h1>New Customer Order in Table
-            <?php echo htmlspecialchars($tableId); ?>
-            compiled by waiter #<?php echo htmlspecialchars($waiterId); ?>
+            <h1>New Customer Order for Table: 
+            <i><?php echo htmlspecialchars($table['name']); ?></i>
         </h1>
 
         <div class="container mt-4">
             <table class="table table-striped table-hover">
+                <!-- Table header for the order items -->
                 <thead class="table-primary">
                     <tr>
                         <th>Product ID</th>

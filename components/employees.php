@@ -1,15 +1,21 @@
 <?php
+if (!isset($_SESSION['employeeId'])) {
+    die("Errore: Accesso non autorizzato. Effettua il login.");
+}
+
 $employees = $dbh->getEmployees();
 ?>
 
 <main class="container mt-4">
     <h1 class="mb-4">Employees Management</h1>
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        <!-- Loop through all employees and display them in cards -->
         <?php foreach ($employees as $employee): ?>
             <div class="col">
                 <div class="card h-100">
                     <div class="card-header text-center">
                         <h5 class="card-title my-2">
+                            <!-- Display employee's name and surname in the card title -->
                             <?php echo htmlspecialchars($employee['name'] . ' ' . $employee['surname']); ?>
                         </h5>
                     </div>
@@ -24,8 +30,9 @@ $employees = $dbh->getEmployees();
                                 <li class="mb-2"><strong>Hiring Date:</strong>
                                     <?php echo htmlspecialchars(date('j F Y', strtotime($employee['hiringDate']))); ?>
                                 </li>
-                                <li class="mb-2"><strong>Roles:</strong>
+                                <li class="mb-2"><strong>Roles:</strong> 
                                     <?php
+                                    // Create an array with all roles as string
                                     $roles = [];
                                     if ($employee['isWaiter'])
                                         $roles[] = 'Waiter';
@@ -35,11 +42,11 @@ $employees = $dbh->getEmployees();
                                         $roles[] = 'Kitchen Staff';
                                     if ($employee['isAdmin'])
                                         $roles[] = 'Admin';
-                                    echo htmlspecialchars(implode(', ', $roles));
+                                    echo htmlspecialchars(implode(', ', $roles)); // Create a string with all roles from the array
                                     ?>
                                 </li>
                                 <li class="mb-2"><strong>Address:</strong> <?php
-                                $address = [];
+                                $address = []; // Create an array with all the non-null employee's house address
                                 if ($employee['streetName'])
                                     $address[] = $employee['streetName'];
                                 if ($employee['streetNumber'])
@@ -48,7 +55,7 @@ $employees = $dbh->getEmployees();
                                     $address[] = $employee['city'];
                                 if ($employee['zipCode'])
                                     $address[] = $employee['zipCode'];
-                                echo htmlspecialchars(implode(', ', $address));
+                                echo htmlspecialchars(implode(', ', $address)); 
                                 ?></li>
                             </ul>
                         </div>
@@ -66,7 +73,7 @@ $employees = $dbh->getEmployees();
     </div>
 </main>
 
-<!-- Offcanva for the navbar -->
+<!-- Offcanva for the side menu -->
 <div class="offcanvas offcanvas-start" tabindex="-1" id="top-menu" aria-labelledby="offcanvasTopLabel">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="offcanvasTopLabel">Option Menu</h5>

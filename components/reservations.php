@@ -1,17 +1,25 @@
+<?php
+if (!isset($_SESSION['employeeId'])) {
+    die("Errore: Accesso non autorizzato. Effettua il login.");
+}
+?>
+
+<!-- Page to view reservations -->
 <main class="container mt-5">
     <h1 class="mb-4">Reservations</h1>
 
     <?php
-    // Determina la data da utilizzare
-    $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
+    // Get date if passed as GET, or else get current date
+    $date = $_GET['date'] ?? date('Y-m-d');
 
-    // Valida la data
+    // Control that the date format is correct
     $dateObj = DateTime::createFromFormat('Y-m-d', $date);
     if (!$dateObj || $dateObj->format('Y-m-d') !== $date) {
-        $date = date('Y-m-d'); // Se la data non è valida, usa la data odierna
+        $date = date('Y-m-d'); // If not, use the current date
     }
     ?>
 
+    <!-- Date selector -->
     <div class="row mb-4">
         <div class="col-md-6">
             <label for="date-selector" class="form-label">Select Date:</label>
@@ -22,17 +30,18 @@
 
     <div id="reservations-container" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         <?php
-        $reservations = $dbh->getReservationsOnDay($date); // Passa la data selezionata
+        $reservations = $dbh->getReservationsOnDay($date); // Get reservations on the selected date
 
         if(empty($reservations)): ?>
         <div class="col-12 justify-content-center text-center">
-            <h2>No reservation on this day!</h2>
+            <h2>No reservations on this day!</h2> <!-- Inform user that there are no reservations on this day if so -->
         </div>
 
         <?php
         else:?>
 
         <?php
+        // Loop through the reservations and display them in cards
         foreach ($reservations as $reservation):
             ?>
             <div class="col">
@@ -46,7 +55,7 @@
                         <p class="card-text"><strong>Cell number: </strong> <?php echo htmlspecialchars($reservation['cellNumber']); ?></p>
                         <p class="card-text"><strong>For: </strong> <?php echo htmlspecialchars($reservation['seats']); echo $reservation['seats'] == 1 ? " person" :" people"; ?></p>
                         <p class="card-text"><strong>At: </strong>
-                            <?php echo date('F j, g:i a', strtotime($reservation['dateAndTime'])); ?>
+                            <?php echo date('F j, g:i a', strtotime($reservation['dateAndTime'])); ?> <!-- Format the date and time: day month, hour:minute am/pm -->
                         </p>
                         <p><strong>Table: </strong><?php echo htmlspecialchars($reservation['tableName'] ?? "No table reserved yet"); ?></p>
                     </div>
@@ -63,10 +72,6 @@
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body d-flex flex-column">
-        <div class="list-group">
-            <a class="list-group-item list-group-item-dark list-group-item-action" id="new-table-link" href="#"
-                data-bs-toggle="modal" data-bs-target="#addTableModal">Add new table</a>
-        </div>
         <div class="mt-auto">
             <hr>
             <button class="btn btn-danger w-100" onclick='window.location.href = "./api/logout.php"'><img
