@@ -38,7 +38,9 @@ if (!$tableId || !$orderNum) {
                 </tr>
             </thead>
             <tbody id="orderItems">
+                <!-- Loop through the order items and display them in the table -->
                 <?php foreach ($orderItems as $item): ?>
+                    <!-- Display each order item in a row -->
                     <tr>
                         <td><?php echo htmlspecialchars($item['name']); ?></td>
                         <td><?php echo htmlspecialchars($item['quantity']); ?></td>
@@ -46,7 +48,8 @@ if (!$tableId || !$orderNum) {
                         <td>
                             <?php if (!empty($item['variations'])): ?>
                                     <ul class="list-unstyled mb-0">
-                                    <?php foreach ($item['variations'] as $variation): ?>
+                                        <!-- Loop through the variations and display them as an unordered list -->
+                                        <?php foreach ($item['variations'] as $variation): ?>
                                             <li><?php echo htmlspecialchars($variation['name']); ?> 
                                                 (+<?php echo number_format($variation['additionalPrice'], 2); ?>)
                                             </li>

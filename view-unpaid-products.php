@@ -13,9 +13,9 @@ if (!isset($_GET['tableId'])) {
     die('Missing required data');
 }
 
-unset($tableId);
+unset($table);
 $table = $dbh->getTable($_GET['tableId']);
-
+unset($unpaidProducts);
 $unpaidProducts = $dbh->getUnpaidProducts($table['tableId']);
 ?>
 
@@ -37,6 +37,7 @@ $unpaidProducts = $dbh->getUnpaidProducts($table['tableId']);
     <div class="container mt-4">
         <h1 class="mb-4">Payment for Table: <?php echo htmlspecialchars($table['name']); ?></h1>
 
+        <!-- Display the table with the unpaid products if there are any -->
         <?php if (!empty($unpaidProducts)): ?>
             <table class="table table-striped table-hover">
                 <thead class="table-primary">
@@ -48,11 +49,13 @@ $unpaidProducts = $dbh->getUnpaidProducts($table['tableId']);
                     </tr>
                 </thead>
                 <tbody id="unpaidItems">
+                    <!-- Loop through the unpaid products and display them in the table -->
                     <?php foreach ($unpaidProducts as $product): ?>
                         <tr>
                             <td><?php echo htmlspecialchars($product['prodName']); ?>
                                 <?php if (!empty($product['variations'])): ?>
                                     <ul>
+                                        <!-- Loop through the variations and display them as an unordered list -->
                                         <?php foreach ($product['variations'] as $variation): ?>
                                             <small class="text-muted">
                                                 <li>
@@ -82,6 +85,7 @@ $unpaidProducts = $dbh->getUnpaidProducts($table['tableId']);
                 <h3>Total: $<span id="totalAmount">0.00</span></h3>
             </div>
 
+            <!-- Payment method selection -->
             <div class="mt-4">
                 <h4>Payment Method:</h4>
                 <div class="form-check">
@@ -100,6 +104,7 @@ $unpaidProducts = $dbh->getUnpaidProducts($table['tableId']);
             </div>
             
             <div id="cashDetails" class="mt-3 row" style="display: none;">
+                <!-- Cash payment details -->
                 <div class="mb-3" style="max-width: 150px;">
                     <label for="givenMoney" class="form-label">Amount Given:</label>
                     <input type="number" class="form-control" id="givenMoney" min="0" step="0.5">
@@ -112,6 +117,7 @@ $unpaidProducts = $dbh->getUnpaidProducts($table['tableId']);
 
             <button id="registerPayment" class="btn btn-primary mt-3 mb-5">Register Payment</button>
         <?php else: ?>
+            <!-- Display a message if there are no unpaid products -->
             <h2 class="mt-5 pt-5" style="color: green">All products in the table are paid!</h2>
         <?php endif; ?>
     </div>

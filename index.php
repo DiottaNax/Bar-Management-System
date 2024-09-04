@@ -2,12 +2,12 @@
 
 require "./db-config.php";
 
-// Funzione per controllare se i cookie sono settati
+// Verify if the user is logged in
 function isLoggedIn() {
     return isset($_SESSION['employeeId']);
 }
 
-// Se i cookie sono settati, reindirizza a home.php
+// If user is logged in then redirect to home.php
 if (isLoggedIn()) {
     header("Location: home.php");
     exit();
