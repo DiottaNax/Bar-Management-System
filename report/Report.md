@@ -119,31 +119,44 @@ L'entità ***prodotto*** viene identificata tramite un codice univoco, dall'anal
 
  queste tipologie sono specializzazioni _sovrapponibili_ dell'entità prodotto. 
 
-![Schema parziale sulle specializzazioni di prodotto](./img/Schema_Prodotto.png){width=600px}
+![Schema parziale sulle specializzazioni di prodotto](./img/Schema_Prodotto.png){height=300px}  
 
 \newpage
-Uno stesso ***prodotto*** può presentarsi nella stessa ***comanda*** con richieste  e quantità differenti (si pensi ad esempio ad una stessa bevanda, nello stesso tavolo, ordinata allo stesso momento, una con ghiaccio, una senza).
-E' quindi necessario reificare l'entità _prodotto in comanda_, identificata tramite un ordine nella comanda e il codice della comanda.
+Uno stesso ***prodotto*** può presentarsi nella stessa ***comanda*** con **variazioni** e quantità differenti (si pensi ad esempio ad una stessa bevanda, nello stesso tavolo, ordinata allo stesso momento, una con ghiaccio, una senza).
+E' quindi necessario reificare l'entità ***prodotto al tavolo***, identificata tramite un **id univoco** nel tavolo a cui si riferisce.
 
-Ad ogni comanda corrisponde un ***tavolo***, identificato anch'esso tramite un _codice univoco_. Ad ogni tavolo è possibile assegnare un _nome_ e un _numero di clienti_ seduti.
+Ogni comanda si riferisce ad un ***tavolo***, identificato anch'esso tramite un **codice univoco**. Ad ogni tavolo è possibile assegnare un **nome** e un **numero di clienti** seduti.
+
+Ad ogni prodotto al tavolo è possibile associare una variazione ed una quantità associata alla comanda. Ogni prodotto del tavolo può essere presente una sola volta nella stessa comanda, perciò è possibile creare un'associazione con la comanda e l'attributo *quantità*. Tale associazione esprime il vincolo per il quale le stesse istanze di ordine e prodotto non possono presentarsi con molteplici quantità.
 
 ![Schema parziale sulle relazioni tra tavoli, comande e prodotti](./img/Schema_prodotti-comande-tavoli.png){width=700px}
 
-\newpage
 
+\newpage
 Le entità ***cameriere, preparatore, amministratore*** e ***magazziniere*** non sono altro che specializzazioni dell'entità ***persona*** (o dipendente), ognuna identificata tramite _codice fiscale_. 
-Di ogni dipendente si vuole mantenere nel databse il ruolo all'interno del locale per conoscere le operazioni che possono effettuare (ad esempio la visualizzazione dei dati sul fatturato è un'operazione che spetta esclusivamente ad un amministratore). In particolare per ogni comanda si vuole tenere nel database il cameriere che l'ha compilata.
-
-![Schema parziale sulle specializzazioni dei dipendenti](./img/Schema_dipendenti.png){width=700}
+Di ogni dipendente si vuole mantenere nel databse il ruolo all'interno del locale per conoscere le operazioni che possono effettuare (ad esempio la visualizzazione dei dati sul fatturato è un'operazione che spetta esclusivamente ad un amministratore). In particolare per ogni comanda e per ogni ordine di magazzino si vuole tenere nel database il cameriere e l'addetto al magazzino che li hanno compilati.
 
 \newpage
-Uno stesso ***prodotto*** può presentarsi in uno stesso ***ordine*** al più una volta, perciò la relazione di _ordinazione_ possiede l'attributo _quantità_ esprimendo il vincolo per il quale le stesse istanze di ordine e prodotto non possono presentarsi con molteplici quantità, creando confusione nell'ordine. Per la _disponibilità_ in magazzino del prodotto si è aggiunto un semplice attributo alla specializzazione ***prodotto in magazzino***.
+Uno stesso ***prodotto*** può essere incluso in uno stesso ***ordine di magazzino***, identificato tramite un **codice univoco**, più volte, ordinato ad esempio da ***fornitori*** diversi, ognuno con un **prezzo** potenzialmente diverso per lo stesso prodotto. E' quindi necessario reificare l'entità di ***prodotto in ordine***, avente come attributi la quantità ordinata e un'associazione al fornitore scelto.
+
+Dell'ordine di magazzino è inoltre necessario tenere traccia nel database della data e ora dell'ordine, se l'ordine è già stato inviato e il dipendente che lo ha compilato.
 
 ![Schema parziale sugli ordini dei prodotti](./img/Schema_prodotto-ordine.png){width=660}
 
 \newpage
+Ogni ***prodotto al tavolo*** può essere pagato in più scontrini in quantità differenti e con modalità di pagamento differenti. E' necessario quindi reificare l'entità di ***prodotto pagato***, avente come attributo la ***quantità pagata***.
+
+Ogni ***scontrino*** è identificato da un **codice univoco**, ha una **data e un orario**, una **spesa** e una **modalità di pagamento**. Uno scontrino, inoltre, può essere o meno collegato ad un tavolo, infatti un prodotto potrebbe anche essere consumato al banco ad esempio.
+
+![Schema parziale sulle relazioni tra prodotti al tavolo e scontrini](./img/Schema_scontrino-prodotto-tavolo.png){width=660}
+
+## Schema ER completo
+
 Di seguito si allega lo schema ER nel suo complesso, importato su [DB-Main](www.db-main.eu).
 
+![Schema ER completo](./img/er-ruotato.png)
+
+\newpage
 # Progettazione logica
 
 ## Stima del volume di dati
@@ -157,23 +170,23 @@ Di seguito la stima dei volumi richiesti per entità e relazioni:
 | Menu Product                | E             | 80         |
 | Stocked Up Product          | E             | 250        |
 | Ingredient                  | R             | 320[^3]    |
-| Variation                   | E             | 480[^4]    |
+| Variation                   | E             | 500        |
 | customer choice             | R             | 480        |
 
 [^3]: Considerando una media di 4 ingredienti per prodotto in menu 
-[^4]: Considerando 6 variazioni per ogni prodotto in menu
 
 [Tabella ordini]: #Tabella ordini, tavoli, scontrini e prenotazioni
 
 |\bluerow\ **Concetto** | **Costrutto** | **Volume** |
 |:----------------------|:-------------:|-----------:|
 | Table                 | E             | 150.000    |
-| Product In Table      | E             | 750.000[^5]|
-| Customer Order        | E             | 300.000[^6]|
+| Product In Table      | E             | 750.000[^4]|
+| Customer Order        | E             | 300.000[^5]|
+| ordination            | R             | 750.000    |
 | based on              | R             | 750.000    |
-| additional request    | R             | 750.000[^7]|
-| Receipt               | E             | 300.000[^8]|
-| Paid Product          | E             | 1.000.000[^9]|
+| additional request    | R             | 750.000[^6]|
+| Receipt               | E             | 300.000[^7]|
+| Paid Product          | E             | 1.000.000[^8]|
 | product payment       | R             | 1.000.000  |
 | receipt composition   | R             | 1.000.000  |
 | table payment         | R             | 300.000    |
@@ -183,11 +196,11 @@ Di seguito la stima dei volumi richiesti per entità e relazioni:
 | Reservation           | E             | 5.000      |
 | request               | R             | 5.000      |
 
-[^5]: Considerando circa 5 diversi prodotti ordinati in un tavolo
-[^6]: Considerando circa 2 comande per tavolo
-[^7]: Considerando che ogni prodotto ordinato presenta una variazione
-[^8]: Considerando circa 2 scontrini per tavolo
-[^9]: Considerando che per ogni prodotto al tavolo deve esistere almeno un corrispondente prodotto pagato e che alcuni potrebbero essere pagati in scontrini diversi
+[^4]: Considerando circa 5 diversi prodotti ordinati in un tavolo
+[^5]: Considerando circa 2 comande per tavolo
+[^6]: Considerando che ogni prodotto ordinato presenta una variazione
+[^7]: Considerando circa 2 scontrini per tavolo
+[^8]: Considerando che per ogni prodotto al tavolo deve esistere almeno un corrispondente prodotto pagato e che alcuni potrebbero essere pagati in scontrini diversi
 
 [Tabella magazzino]: #Tabella ordini di magazzino
 
@@ -206,7 +219,7 @@ Di seguito la stima dei volumi richiesti per entità e relazioni:
 |\bluerow\ **Concetto**       | **Costrutto** | **Volume** |
 |:----------------------------|:-------------:|-----------:|
 | Waiter                      | E             | 25         |
-| order compilation           | R             | 100.000    |
+| order compilation           | R             | 300.000    |
 | Kitchen Staff               | E             | 25         |
 | Admin                       | E             | 5          |
 | Storekeeper                 | E             | 10         |
@@ -221,12 +234,12 @@ Le operazioni da effettuare sono quelle precedentemente elencate nella fase di a
 | 1.                              | Aggiornare prodotti                                         | 50 all'anno        |
 | 2.                              | Aggiungere tavoli                                           | 200 a settimana    |
 | 3.                              | Compilare comande                                           | 800 a settimana    |
-| 4.                              | Mostrare le comande non completate in ordine di arrivo      | 30 al giorno       |
+| 4.                              | Mostrare le comande filtrate per stato e numerate in base all'ordine di arrivo in giornata | 30 al giorno       |
 | 5.                              | Mostare il numero di tavoli e clienti serviti in una sera   | 2 al giorno        |
-| 6.                              | Ricerca prodotti per categorie e sottocategorie             | 10 al giorno       |
-| 7.                              | Ricerca prodotti per nome                                   | 4000 a settimana   |
+| 6.                              | Visualizzare prodotti e relative variazioni in una comanda  | 10 al giorno       |
+| 7.                              | Ricerca prodotti per similitudine di nome, categoria e sottocategoria | 4000 a settimana   |
 | 8.                              | Visualizzare prodotti non pagati in un tavolo               | 2400 a settimana   |
-| 9.                              | Compilare scontrini                                         | 600 a settimana    |
+| 9.                              | Compilare scontrini di un tavolo                            | 600 a settimana    |
 | 10.                             | Visualizzare i guadagni in un dato periodo                  | 10 al mese         |
 | 11.                             | Compilare ordini del magazzino                              | 3 a settimana      |
 | 12.                             | Visualizzare le spese per i rifornimenti in un dato periodo | 10 al mese         |
@@ -354,17 +367,17 @@ Occorre poi creare gli _elementi di fornitura_ con le quantità scelte.
 
 ### Operazione 12 - Visualizzare le spese per i rifornimenti in un dato periodo
 
-Considerando come riferimento una settimana[^10]:
+Considerando come riferimento una settimana[^9]:
 
-[^10]: Ci si attiene alle stime fatte precedentemente, che erano su base settimanale. Il costo può essere moltiplicato per trovare la stima mensile e/o annuale.
-[^11]: Se si volesse ottenere il costo di una lettura su base mensile fatta 3 volte a settimana il costo diventerebbe:  
+[^9]: Ci si attiene alle stime fatte precedentemente, che erano su base settimanale. Il costo può essere moltiplicato per trovare la stima mensile e/o annuale.
+[^10]: Se si volesse ottenere il costo di una lettura su base mensile fatta 3 volte a settimana il costo diventerebbe:  
         _Totale = 63L * 4 * 3 = 756 a settimana_
 
 | \bluerow\ **Concetto** | **Costrutto** | **Accessi** | **Tipo** |
 |:----------------------:|:-------------:|:-----------:|---------:|
 | Stock Order            | E             | 3           | L        |
 | Supply Item            | E             | 60          | L        |
-| \lbluerow              | **Totale:**   | 63L[^11] →     189 a settimana |
+| \lbluerow              | **Totale:**   | 63L[^10] →     189 a settimana |
 
 ### Operazione 13 - Visualizzare le prenotazioni per un dato giorno
 
@@ -434,20 +447,21 @@ Nello schema E/R sono eliminate le seguenti relazioni:
 
 - **ingredient**: reificata importando _menuProdId_ da _Menu Product_ e _ingredientId_ da _Stocked Up Product_
 - **based on**: eliminata importando _menuProdId_ da _Menu Product_ a _Product In Table_
-- **customer choice**: eliminata importando _prodId_ da _Menu Product_ a _Variation_
+- **is**: eliminata importando _menuProdId_ da _Menu Product_ a _Counter Product_
 - **additional request**: reificata importando _menuProdId_ da _Menu Product_, _tableId_, _orderedProdId_ da _Product in Table_ e _variationId_ da _Variation_
-- **ordination**: reificata importando _menuProdId_ da _Menu Product_, _orderNum_ da _Customer Order_, _orderedProdId_ da _Product In Table_ e _tableId_
-- **assignment**: eliminata importando _tableId_ da _Table_ a _Customer Order_
+- **counter request**: reificata importando _menuProdId_ da _Menu Product_, _orderedProdId_ da _Counter Product_, _receiptId_ e _variationId_
+- **ordination**: reificata importando _menuProdId_ da _Menu Product_, _orderId_ da _Customer Order_, _orderedProdId_ da _Product In Table_ e _tableId_
+- **counter ordination**: eliminata importando _orderId_ da _Counter Order_
+- **counter payment**: eliminata importando _receiptId_ da _Receipt_
+- **assignment**: eliminata importando _tableId_ in _Customer Order_
 - **order composition**: eliminata importando _tableId_ in _Product in Table_
-- **product payment**: eliminata importando _orderedProdId_ da _Product In Table_, _menuProdId_ da _Menu Product_ e _tableId_ in _Paid Product_
-- **order compilation**: eliminata importando _waiterId_ da _Waiter_ a _Customer Order_
-- **receipt composition**: eliminata importando _receiptId_ da _Receipt_ a _Paid Product_
-- **table payment**: eliminata importando _tableId_ in _Receipt_
+- **paid product**: reificata importando _orderedProdId_ da _Product In Table_, _menuProdId_ da _Menu Product_ e _tableId_
+- **order compilation**: eliminata importando _waiterId_ da _Waiter_ a _Customer Order_ e _Counter Order_
 - **request**: eliminata importando _tableId_ da _Table_ a _Reservation_
-- **supply**: reificata importando _prodId_ da _Stocked Up Product_ e _supplierName_ da _Supplier_
+- **supply cost**: reificata importando _prodId_ da _Stocked Up Product_ e _supplierName_ da _Supplier_
 - **type**: eliminata importando _prodId_ da _Stocked Up Product_ a _Supply Item_
 - **provision**: eliminata importando _supplierName_ da _Supplier_ a _Supply Item_
-- **inclusion**: eliminata importando _orderDate_ da _Stock Order_ a _Supply Item_
+- **inclusion**: eliminata importando _orderId_ da _Stock Order_ a _Supply Item_
 - **order planning**: eliminata importando _storekeeperId_ da _Storekeeper_ a _Stock Order_
 
 ## Analisi delle ridondanze

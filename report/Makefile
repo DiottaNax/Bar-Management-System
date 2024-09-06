@@ -5,7 +5,7 @@ PANDOC_OPTS = --number-sections --eol=crlf
 all: $(OUTPUT_FILE)
 
 # To generate output file
-$(OUTPUT_FILE): Report.md
+$(OUTPUT_FILE): Report.md img/*
 	echo "Creating ${OUTPUT_FILE}..."
 	pandoc Report.md -o $(OUTPUT_FILE) $(PANDOC_OPTS)
 
@@ -18,4 +18,4 @@ clean:
 cleanall: clean
 	rm -f *.log *.tex
 
-.PHONY: all clean cleanall view
+.PHONY: all clean cleanall
