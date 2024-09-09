@@ -33,11 +33,11 @@ Un primo testo ottenuto dall’intervista è il seguente:
 
 Si vuole tenere traccia delle comande e della gestione del magazzino di un bar/ristorante memorizzandone i prodotti e le comande. Ogni prodotto è caratterizzato da un nome, una descrizione, un prezzo di vendita o, eventualmente, un prezzo di acquisto per la gestione del magazzino. 
 
-Al momento della creazione di una comanda, vengono registrati i prodotti associati, la quantità di ciascun prodotto e il tavolo a cui la comanda è destinata. I tavoli possono essere identificati sia da un indice numerico sia da un nome scelto al momento (ad esempio "Tavolo 1" o "Tavolo Pippo").
+Al momento della creazione di una comanda, vengono registrati i prodotti associati, la quantità di ciascun prodotto e il tavolo a cui la comanda è destinata. Ai tavoli è possibile attribuire un nome scelto al momento (ad esempio "Tavolo Sala 1" o "Tavolo Pippo").
 
-Il sistema permette di redigere uno o più scontrini per ogni tavolo, consentendo di dividere la spesa tra più clienti se necessario. Gli scontrini riportano il prezzo di ogni prodotto e il totale della spesa. Si tenga presente che anche se in futuro si decidesse di eliminare con una certa periodicità lo storico dei tavoli serviti, gli scontrini non devono comunque essere eliminati.
+Il sistema permette di redigere uno o più scontrini per ogni tavolo, consentendo di dividere la spesa tra più clienti se necessario. Gli scontrini riportano il prezzo di ogni prodotto e il totale della spesa. Si tenga presente che uno scontrino non si riferisce necessariamente ad un tavolo, un ordine può anche essere fettuato al tavolo e in quel caso necessita il pagamento al momento dell'ordine.
 
-Il database mantiene uno storico di tutti i pagamenti riscossi, consentendo la generazione di grafici per monitorare il fatturato sia annuale che mensile, o l'andamento delle vendite di ciascun prodotto. 
+Il database mantiene uno storico di tutti i pagamenti riscossi, consentendo la generazione di grafici per monitorare il fatturato sia annuale che mensile, o l'andamento delle vendite di ciascun prodotto.
 
 Il bar/ristorante dispone di uno o più amministratori con la possibilità di aggiungere nuovi utenti e visualizzare i dati sul fatturato. Gli utenti possono essere suddivisi nei seguenti ruoli:
 
@@ -51,7 +51,7 @@ Gli amministratori possono anche visualizzare report dettagliati che comprendono
 
 - Elenco dei prodotti più venduti.
 - Analisi del fatturato su base giornaliera, settimanale, mensile e annuale.
-- Monitoraggio delle scorte di magazzino, inclusi avvisi per i prodotti che stanno per terminare.
+- Analisi dei servizi effettuati: persone e tavoli serviti
 
 In sintesi, il compito dello staff del bar/ristorante è assicurarsi che le comande vengano redatte e gestite correttamente, che i prodotti siano sempre disponibili in magazzino, e che le vendite e il fatturato vengano monitorati e analizzati per migliorare la gestione complessiva del locale.
 
@@ -59,10 +59,10 @@ In sintesi, il compito dello staff del bar/ristorante è assicurarsi che le coma
 
 ## Estrazione dei concetti principali
 
-| \bluerow\ **Termine**  | **Breve descrizione**       | **Eventuali Sinonimi** |
+| \bluerow\ **Termine**  | **Breve descrizione**           | **Eventuali Sinonimi** |
 |:-------------|:-----------------------------------------:|-------------------:|
 | Prodotto     | Sono gli articoli venduti dall'esercizio, ognuno con un proprio costo |
-| Tavolo       | Oggetto a cui è possibile attribuire un nome e una data, rappresenta il gruppo dei clienti a cui si riferiscono comande e scontrini       | Clienti |
+| Tavolo       | Oggetto a cui è possibile attribuire un nome e una data, rappresenta il gruppo dei clienti a cui si riferiscono comande e scontrini | Clienti |
 | Comanda      | Una comanda è un ordine effettuato in un qualsiasi momento dai clienti di un tavolo, contenente uno o più prodotti |
 | Scontrino    | Oggetto in cui viene riportata una spesa effettuata da un tavolo, possono esserci uno o più scontrini associati ad un tavolo | Spesa |
 | Cameriere    | Colui che compila comande e scontrini | Cassiere |
@@ -74,9 +74,9 @@ In sintesi, il compito dello staff del bar/ristorante è assicurarsi che le coma
 A seguito della lettura e comprensione dei requisiti si redige un testo che ne riassuma tutti i concetti, con particolare attenzione a quelli principali ed eliminando le ambiguità:
 
 > Per ogni ***prodotto***[^1] nel menù vengono memorizzati _nome, descrizione, prezzo di vendita_, inoltre ogni prodotto possiede un _codice_ univoco assegnatogli quando viene aggiunto al menù. Se il prodotto è un semplice prodotto da magazzino allora deve riportare anche il proprio _costo_.  
-> Ogni ***comanda*** possiede _data e ora_, può essere in preparazione o completata ed ha un _codice univoco_ all'interno del tavolo a cui è collegata. Ad ogni comanda sono associati uno o più prodotti insieme alle _quantità_ richieste. Deve essere possibile verificare che tutti i prodotti appartenenti ad una comanda sono stati pagati.
+> Ogni ***comanda*** possiede _data e ora_, può essere in preparazione o completata ed ha un _codice univoco_, le comande possono riguardare _ordini al banco_ oppure _ordini al tavolo_. Ad ogni comanda sono associati uno o più prodotti insieme alle _quantità_ richieste. Deve essere possibile verificare che tutti i prodotti appartenenti ad una comanda sono stati pagati.
 > Un ***tavolo*** è caratterizzato da: _un codice univoco, un nome (scelto al momento della creazione), un numero di persone_ sedute al tavolo e _una data di creazione_.  
-> Uno ***scontrino*** rappresenta la somma dei costi di uno o più prodotti presenti in una comanda associata ad una tavolo, l'insieme degli scontrini erogati in un tavolo rappresenta la spesa totale. Ogni scontrino ha un _codice univoco_ indipendente dal tavolo, _una data e un orario_, _una spesa_ e _una modalità di pagamento_[^2].  
+> Uno ***scontrino*** rappresenta la somma dei costi di uno o più prodotti presenti in una comanda associata ad una tavolo, l'insieme degli scontrini erogati in un tavolo rappresenta la spesa totale. Ogni scontrino ha un _codice univoco_ indipendente dal tavolo, _una data e un orario_, _una spesa_ e _una modalità di pagamento_[^2], per ogni scontrino deve essere possibile elencare i prodotti che lo componevano e le relative quantità.  
 > Lo staff è composto da:
 
 >   - ***amministratori***: hanno la possibilità di aggiungere membri dello staff e visualizzare info sulle vendite
@@ -89,17 +89,18 @@ A seguito della lettura e comprensione dei requisiti si redige un testo che ne r
 [^1]: Un prodotto può essenzialmente essere un prodotto preparato (es: un drink), un prodotto da magazzino (es: farina) oppure entrambi (es: bottiglia di vino).
 [^2]: i.e. contante, bancomat...
 
+
 Segue un elenco delle principali azioni richieste:
 
 1. _Aggiornare prodotti_
 2. _Aggiungere tavoli_
 3. _Compilare comande_
-4. _Mostrare le comande non completate in ordine di arrivo_
+4. _Mostrare le comande filtrate per stato e numerate in base all'ordine di arrivo in giornata_
 5. _Mostare il numero di tavoli e clienti serviti in una sera_
-6. _Ricerca prodotti per categorie e sottocategorie_
-7. _Ricerca prodotti per nome_
+6. _Visualizzare prodotti e relative variazioni appartenenti ad una comanda_
+7. _Ricerca prodotti per similitudine di nome, categoria e sottocategoria_
 8. _Visualizzare prodotti non pagati in un tavolo_
-9. _Compilare scontrini_
+9. _Compilare scontrini di un tavolo_
 10. _Visualizzare i guadagni in un dato periodo_
 11. _Compilare ordini del magazzino_
 12. _Visualizzare le spese per i rifornimenti in un dato periodo_
@@ -122,10 +123,11 @@ L'entità ***prodotto*** viene identificata tramite un codice univoco, dall'anal
 ![Schema parziale sulle specializzazioni di prodotto](./img/Schema_Prodotto.png){height=300px}  
 
 \newpage
+
+Ogni comanda si riferisce ad un ***tavolo***, se ordinata da esso, altrimenti allo ***scontrino*** tramite cui è stata pagata, anch'essi identificati tramite un **codice univoco**. Ad ogni tavolo è possibile assegnare un **nome** e un **numero di clienti** seduti.
+
 Uno stesso ***prodotto*** può presentarsi nella stessa ***comanda*** con **variazioni** e quantità differenti (si pensi ad esempio ad una stessa bevanda, nello stesso tavolo, ordinata allo stesso momento, una con ghiaccio, una senza).
 E' quindi necessario reificare l'entità ***prodotto al tavolo***, identificata tramite un **id univoco** nel tavolo a cui si riferisce.
-
-Ogni comanda si riferisce ad un ***tavolo***, identificato anch'esso tramite un **codice univoco**. Ad ogni tavolo è possibile assegnare un **nome** e un **numero di clienti** seduti.
 
 Ad ogni prodotto al tavolo è possibile associare una variazione ed una quantità associata alla comanda. Ogni prodotto del tavolo può essere presente una sola volta nella stessa comanda, perciò è possibile creare un'associazione con la comanda e l'attributo *quantità*. Tale associazione esprime il vincolo per il quale le stesse istanze di ordine e prodotto non possono presentarsi con molteplici quantità.
 
@@ -411,12 +413,12 @@ Per ogni _prodotto in menu_ consideriamo una media di 3 _ingredienti_, come già
 
 Di seguito viene stilata una tabella riassuntiva coi costi sopraelencati:
 
-|\bluerow\ **Indice**  | **Operazione**                                              | **Frequenza**      | **Costo stimato** |
+|\bluerow\ **Indice**             | **Operazione**                                              | **Frequenza**      | **Costo stimato** |
 |:--------------------------------|:------------------------------------------------------------|:-------------------|:------------------|
 | 1.                              | Aggiornare prodotti                                         | 50 all'anno        | 500 all'anno      |
 | 2.                              | Aggiungere tavoli                                           | 200 a settimana    | 400 a settimana   |
-| 3.                              | Compilare comande                                           | 800 a settimana    | 23.200 a settimana  | 
-| 4.                              | Mostrare le comande non completate in ordine di arrivo      | 30 al giorno       | 120 al girono      |
+| 3.                              | Compilare comande                                           | 800 a settimana    | 23.200 a settimana| 
+| 4.                              | Mostrare le comande non completate in ordine di arrivo      | 30 al giorno       | 120 al girono     |
 | 5.                              | Mostare il numero di tavoli e clienti serviti in una sera   | 2 al giorno        | 2 al giorno       |
 | 6.                              | Ricerca prodotti per categorie e sottocategorie             | 10 al giorno       | 20 al giorno      |
 | 7.                              | Ricerca prodotti per nome                                   | 4000 a settimana   | 8000 a settimana  |
@@ -426,7 +428,7 @@ Di seguito viene stilata una tabella riassuntiva coi costi sopraelencati:
 | 11.                             | Compilare ordini del magazzino                              | 3 a settimana      | 258 a settimana   |
 | 12.                             | Visualizzare le spese per i rifornimenti in un dato periodo | 10 al mese         | 189 a settimana   |
 | 13.                             | Visualizzare le prenotazioni per un dato giorno             | 100 a settimana    | 200 a settimana   |
-| 14.                             | Visualizzare la ricetta di un prodotto                      | 20 al giorno       | 140 al giorno      |
+| 14.                             | Visualizzare la ricetta di un prodotto                      | 20 al giorno       | 140 al giorno     |
 | 15.                             | Aggiornare staff del locale                                 | 5 all'anno         | 10 all'anno       |
 
 ## Raffinamento dello schema
