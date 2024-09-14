@@ -1,9 +1,9 @@
 # My-Management-System
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/DiottaNax/KittyGram/blob/main/LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/DiottaNax/KittyGram)](https://github.com/DiottaNax/KittyGram/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/DiottaNax/KittyGram)](https://github.com/DiottaNax/KittyGram/network)
-[![GitHub issues](https://img.shields.io/github/issues/DiottaNax/KittyGram)](https://github.com/DiottaNax/KittyGram/issues)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/DiottaNax/Bar-Management-System/blob/main/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/DiottaNax/Bar-Management-System)](https://github.com/DiottaNax/Bar-Management-System/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/DiottaNax/Bar-Management-System)](https://github.com/DiottaNax/Bar-Management-System/network)
+[![GitHub issues](https://img.shields.io/github/issues/DiottaNax/Bar-Management-System)](https://github.com/DiottaNax/Bar-Management-System/issues)
 
 ## Description
 
