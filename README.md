@@ -32,13 +32,13 @@ Key features include:
 
 ## Getting Started
 
-To create the database use the [My-Management-System.sql](https://github.com/DiottaNax/MyManagementSystem/blob/main/db/My-Management-System.sql) script.
+To create the database use the [My-Management-System.sql](https://github.com/DiottaNax/Bar-Management-System/blob/main/db/My-Management-System.sql) script.
 
 > If you are using xampp you can directly drop the script in the sql console from phpmyadmin
 
 You can access the Web Application from the `index.php`.
 
-To test and access the Application you are provided with a [populate.sql](https://github.com/DiottaNax/MyManagementSystem/blob/main/db/My-Management-System.sql) script.
+To test and access the Application you are provided with a [populate.sql](https://github.com/DiottaNax/Bar-Management-System/blob/main/db/My-Management-System.sql) script.
 
 If you used the `populate.sql` script you will have 3 different account to test the application with:
 
