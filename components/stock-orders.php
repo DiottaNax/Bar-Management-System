@@ -15,9 +15,9 @@ $orders = $dbh->getStockOrders();
         <div class="col-md-6">
             <label for="order-status" class="form-label">Filter Orders:</label>
             <select id="order-status" class="form-select" disabled>
-                <option value="All" selected><a href="./home.php?opt=stock-orders&status=all">All</a></option>
-                <option value="Sent"><a href="./home.php?opt=customer-orders&status=sent">Sent</a></option>
-                <option value="Not sent yet"><a href="./home.php?opt=customer-orders&status=not_sent">Not sent yet</a>
+                <option value="All" selected>All</option>
+                <option value="Sent">Sent</option>
+                <option value="Not sent yet">Not sent yet</option>
                 </option>
             </select>
         </div>
@@ -73,7 +73,7 @@ $orders = $dbh->getStockOrders();
                         </div>
                     </div>
                     <div class="mt-auto card-footer text-center">
-                        <a class="btn btn-primary me-2 disabled" href="#" target="_blank" role="button">Open Order</a>
+                        <a class="btn btn-primary me-2 disabled" href="#" target="_blank" role="button" disabled>Open Order</a>
                     </div>
                 </div>
             </div>
@@ -98,11 +98,15 @@ $orders = $dbh->getStockOrders();
     </div>
     <div class="offcanvas-body d-flex flex-column">
         <div class="list-group">
+            <a href="./compile-stock-order.php" class="list-group-item list-group-item-primary list-group-item-action">
+                <img src="./resources/svg/clipboard-plus.svg" alt="New Stock Order" class="me-1 mb-1">
+                New Stock Order
+            </a>
         </div>
         <div class="mt-auto">
             <hr>
-            <button class="btn btn-danger w-100" onclick='window.location.href = "./api/logout.php"'><img
-                    src="./resources/svg/logout.svg" alt="Logout"> Logout</button>
+            <button class="btn btn-danger w-100 py-2" onclick='window.location.href = "./api/logout.php"'><img
+                    src="./resources/svg/logout.svg" alt="Logout" class="mb-1 me-2">Logout</button>
         </div>
     </div>
 </div>

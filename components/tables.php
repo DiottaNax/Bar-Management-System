@@ -5,7 +5,7 @@ if (!isset($_SESSION['employeeId'])) {
 ?>
 
 <!-- Page to view tables -->
-<main class="container mt-5">
+<main class="container my-5">
     <h1 class="mb-4">Table Management</h1>
 
     <?php

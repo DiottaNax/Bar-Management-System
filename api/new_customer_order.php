@@ -26,7 +26,7 @@ if (!empty($data['orderItems'])) {
 
     try {
         $dbh->db->begin_transaction(); // Start transaction
-        $orderNum = $dbh->createNewCustomerOrder($tableId, $waiterId); // Create customer order
+        $orderId = $dbh->createNewCustomerOrder($tableId, $waiterId); // Create customer order
 
         // Add each product to the customer order inside the transaction
         foreach ($orderItems as $item) {
@@ -35,7 +35,7 @@ if (!empty($data['orderItems'])) {
             $variations = $item['variations'];
             $placeholders = implode(',', array_fill(0, count($variations), '?')); // Add variations as string 
 
-            $dbh->addProductToCustomerOrder($menuProdId, $tableId, $orderNum, $quantity, $variations);
+            $dbh->addProductToCustomerOrder($menuProdId, $tableId, $orderId, $quantity, $variations);
         }
 
         $dbh->db->commit(); // Commit the transaction if everything is ok

@@ -35,7 +35,7 @@ if (
 
     try {
         // Add a new receipt to the database and get the inserted id
-        $receiptId = $dbh->addNewReceipt($total, $paymentMethod, $givenMoney, $changeAmount, $tableId);
+        $receiptId = $dbh->addNewReceipt($total, $paymentMethod, $givenMoney, $changeAmount);
 
         if ($receiptId) {
             // Add each paid product to the receipt

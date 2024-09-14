@@ -3,10 +3,10 @@ require_once './db-config.php';
 
 $tableId = $_GET['tableId'] ?? null;
 $table = $dbh->getTable($tableId);
-$orderNum = $_GET['orderNum'] ?? null;
-$orderItems = $dbh->getCustomerOrderItems($orderNum, $tableId);
+$orderId = $_GET['orderId'] ?? null;
+$orderItems = $dbh->getCustomerOrderItems($orderId, $tableId);
 
-if (!$tableId || !$orderNum) {
+if (!$tableId || !$orderId) {
     die("Order number and table ID are required.");
 }
 ?>
@@ -17,7 +17,7 @@ if (!$tableId || !$orderNum) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Order #<?php echo htmlspecialchars($orderNum); ?></title>
+    <title>Customer Order #<?php echo htmlspecialchars($orderId); ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -25,7 +25,7 @@ if (!$tableId || !$orderNum) {
 
 <body>
     <div class="container mt-5">
-        <h1>Order #<?php echo htmlspecialchars($orderNum); ?> - Table <?php echo htmlspecialchars($table['name']); ?></h1>
+        <h1>Order #<?php echo htmlspecialchars($orderId); ?> - Table <?php echo htmlspecialchars($table['name']); ?></h1>
 
         <table class="table table-striped table-hover">
             <thead>

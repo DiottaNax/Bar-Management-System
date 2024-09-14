@@ -33,7 +33,7 @@
                     </li>
                 <?php endif; ?>
 
-                <?php if ($_SESSION['isStorekeeper'] || $_SESSION['isAdmin']): ?>
+                <?php if ($_SESSION['isAdmin']): ?>
                     <li class="nav-item" opt="graphs">
                         <a class="nav-link" href="./home.php?opt=graphs">Graphs</a>
                     </li>

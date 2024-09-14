@@ -79,8 +79,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // If the user has selected at least one product to pay, try to register the payment
     if (paidProducts.length > 0)
       $.post("./api/register_payment.php", paymentData, function (response) {
-        console.log(response);
-        location.reload();
+        response = JSON.parse(response);
+        if (response.success) {
+          console.log(response);
+          location.reload();
+        } else {
+          alert(response.error);
+        }
       });
     else alert("No product to pay selected");
   });

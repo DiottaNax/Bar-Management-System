@@ -169,7 +169,7 @@ class DatabaseHelper
                         ord.timestamp, 
                         ord.inPreparation, 
                         ord.delivered,
-                        ord.orderNum,
+                        ord.orderId,
                         ROW_NUMBER() OVER (PARTITION BY DATE(ord.timestamp) ORDER BY ord.timestamp) as numOfDay
                     FROM 
                         CUSTOMER_ORDERS AS ord
@@ -196,31 +196,16 @@ class DatabaseHelper
 
     public function createNewCustomerOrder(int $tableId, int $waiterId)
     {
-        // Obtain the order number (corresponds to the number of order in the table + 1)
-        $query = "
-                SELECT IFNULL(MAX(orderNum), 0) + 1 AS next_order_num
-                FROM CUSTOMER_ORDERS
-                WHERE tableId = ?
-                FOR UPDATE";
-
-        $stmt = $this->db->prepare($query);
-        $stmt->bind_param("i", $tableId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
-        $next_order_num = $row['next_order_num'];
-        $stmt->close();
-
         // Create new customer order
         $query = "
-                INSERT INTO CUSTOMER_ORDERS (tableId, orderNum, waiterId)
-                VALUES (?, ?, ?)";
+                INSERT INTO CUSTOMER_ORDERS (tableId, waiterId)
+                VALUES (?, ?)";
 
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param("iii", $tableId, $next_order_num, $waiterId);
+        $stmt->bind_param("ii", $tableId, $waiterId);
         $stmt->execute();
 
-        return $next_order_num;
+        return $this->db->insert_id;
     }
 
 
@@ -257,8 +242,9 @@ class DatabaseHelper
         return $basePrice + $variationPrice;
     }
 
-    public function addProductToCustomerOrder($menuProdId, $tableId, $orderNum, $quantity, array $variationIds)
+    public function addProductToCustomerOrder($menuProdId, $tableId, $orderId, $quantity, array $variationIds)
     {
+        unset($finalPrice);
         $finalPrice = $this->calculateFinalPrice($menuProdId, $variationIds); // Sum menu product's price to the variations' prices
         // Step 1: Check if the product already exists in the table with the same variations
         $existingProductQuery = "
@@ -331,13 +317,13 @@ class DatabaseHelper
 
         // Step 2: Update or insert into ORDINATIONS
         $ordinationQuery = "
-                INSERT INTO ORDINATIONS (orderNum, menuProdId, tableId, orderedProdId, quantity)
+                INSERT INTO ORDINATIONS (orderId, menuProdId, tableId, orderedProdId, quantity)
                 VALUES (?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity)
             ";
 
         $stmt = $this->db->prepare($ordinationQuery);
-        $stmt->bind_param("iiiii", $orderNum, $menuProdId, $tableId, $orderedProdId, $quantity);
+        $stmt->bind_param("iiiii", $orderId, $menuProdId, $tableId, $orderedProdId, $quantity);
         $stmt->execute();
     }
 
@@ -422,7 +408,7 @@ class DatabaseHelper
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
-    public function getCustomerOrderItems($orderNum, $tableId)
+    public function getCustomerOrderItems($orderId, $tableId)
     {
         $query = "
             SELECT o.*, mp.name, pit.finalPrice
@@ -433,11 +419,11 @@ class DatabaseHelper
                     AND o.menuProdId = pit.menuProdId 
                     AND o.tableId = pit.tableId
             WHERE o.tableId = ? 
-                AND o.orderNum = ?;
+                AND o.orderId = ?;
         ";
         $stmt = $this->db->prepare($query);
 
-        $stmt->bind_param("ii", $tableId, $orderNum);
+        $stmt->bind_param("ii", $tableId, $orderId);
         $stmt->execute();
         $result = $stmt->get_result();
         $products = $result->fetch_all(MYSQLI_ASSOC);
@@ -472,14 +458,14 @@ class DatabaseHelper
         return $products;
     }
 
-    public function addNewReceipt($total, $paymentMethod, $givenMoney, $changeAmount, $tableId)
+    public function addNewReceipt($total, $paymentMethod, $givenMoney, $changeAmount)
     {
         $query = "
-            INSERT INTO RECEIPTS(total, paymentMethod, givenMoney, changeAmount, tableId) 
-            VALUES (?, ?, ?, ?, ?);";
+            INSERT INTO RECEIPTS(total, paymentMethod, givenMoney, changeAmount) 
+            VALUES (?, ?, ?, ?);";
         $stmt = $this->db->prepare($query);
 
-        $stmt->bind_param("dsddi", $total, $paymentMethod, $givenMoney, $changeAmount, $tableId);
+        $stmt->bind_param("dsdd", $total, $paymentMethod, $givenMoney, $changeAmount);
         $stmt->execute();
         return $this->db->insert_id;
     }

@@ -1,6 +1,6 @@
 # Variables
 OUTPUT_FILE = Report.pdf
-PANDOC_OPTS = --number-sections --eol=crlf
+PANDOC_OPTS = -N --eol=crlf --highlight-style=tango
 
 all: $(OUTPUT_FILE)
 

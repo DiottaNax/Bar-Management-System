@@ -92,17 +92,17 @@ switch ($orderStatus) {
                         </div>
                         <div class="mt-auto">
                             <!-- Display buttons for actions based on order status -->
+                            <a class="btn btn-primary me-2"
+                                href="./view-customer-order.php?orderId=<?php echo $order['orderId'] ?>&tableId=<?php echo $order['tableId'] ?>"
+                                target="_blank">Open Order</a>
                             <?php if (!$order['delivered']): ?>
                                 <?php if (!$order['inPreparation']): ?>
-                                    <a class="btn btn-primary me-2"
-                                        href="./view-customer-order.php?orderNum=<?php echo $order['orderNum'] ?>&tableId=<?php echo $order['tableId'] ?>"
-                                        target="_blank">Open Order</a>
                                     <a href="#" class="btn btn-success me-2 disabled"
-                                        data-order-id="<?php echo $order['orderNum']; ?>">Start
+                                        data-order-id="<?php echo $order['orderId']; ?>">Start
                                         Preparation</a>
                                 <?php else: ?>
                                     <a href="#" class="btn btn-success disabled"
-                                        data-order-id="<?php echo $order['orderNum']; ?>">Mark
+                                        data-order-id="<?php echo $order['orderId']; ?>">Mark
                                         as
                                         Delivered</a>
                                 <?php endif; ?>
